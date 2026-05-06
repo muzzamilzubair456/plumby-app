@@ -1,0 +1,871 @@
+
+<!-- # Create the customer/dashboard.html file with complete customer dashboard
+# This preserves the exact Stitch.ai UI design while adding Supabase functionality
+
+customer_dashboard = ''' -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <meta name="theme-color" content="#0057cd"/>
+    <title>Dashboard | Plumbly</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed-variant": "#7f2b00",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#0d6efd",
+                        "inverse-surface": "#2d3135",
+                        "tertiary-fixed": "#ffdbce",
+                        "surface-container-low": "#f1f4f9",
+                        "surface-container-high": "#e5e8ee",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "outline-variant": "#c2c6d8",
+                        "on-tertiary-fixed": "#370e00",
+                        "primary": "#0057cd",
+                        "surface-container": "#ebeef3",
+                        "on-primary-fixed-variant": "#00419e",
+                        "on-tertiary-container": "#ffffff",
+                        "on-primary-container": "#ffffff",
+                        "on-background": "#181c20",
+                        "error": "#ba1a1a",
+                        "background": "#f7f9ff",
+                        "secondary-fixed": "#e1e3e4",
+                        "secondary-container": "#e1e3e4",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d7dadf",
+                        "surface": "#f7f9ff",
+                        "on-primary-fixed": "#001946",
+                        "inverse-on-surface": "#eef1f6",
+                        "primary-fixed": "#dae2ff",
+                        "on-surface": "#181c20",
+                        "surface-tint": "#0057ce",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#cf4b00",
+                        "on-secondary-fixed-variant": "#454748",
+                        "surface-bright": "#f7f9ff",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "surface-container-highest": "#e0e3e8",
+                        "surface-variant": "#e0e3e8",
+                        "tertiary": "#a63b00",
+                        "outline": "#727787",
+                        "secondary": "#5c5f60",
+                        "on-secondary-fixed": "#191c1d",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#b1c5ff",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#424655",
+                        "on-secondary-container": "#626566",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#b1c5ff"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        "unit": "4px",
+                        "section-padding": "32px",
+                        "gutter-grid": "16px",
+                        "margin-mobile": "20px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px"
+                    },
+                    fontFamily: {
+                        "h3": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h1": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h2": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    fontSize: {
+                        "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { min-height: 100dvh; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        
+        /* Card hover animations */
+        .plumber-card {
+            transition: all 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+        }
+        .plumber-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,87,205,0.12);
+        }
+        .plumber-card:active {
+            transform: scale(0.98);
+        }
+        
+        /* Category hover */
+        .category-item {
+            transition: all 0.2s ease;
+        }
+        .category-item:hover .category-icon {
+            transform: scale(1.1);
+        }
+        .category-icon {
+            transition: transform 0.2s ease;
+        }
+        
+        /* Featured card */
+        .featured-card {
+            transition: all 0.4s ease;
+        }
+        .featured-card:hover img {
+            transform: scale(1.05);
+        }
+        
+        /* Search focus */
+        .search-input:focus + .search-icon {
+            color: #0057cd;
+        }
+        
+        /* Bottom nav active indicator */
+        .nav-item-active {
+            position: relative;
+        }
+        .nav-item-active::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 4px;
+            background: #0057cd;
+            border-radius: 50%;
+        }
+        
+        /* Skeleton loading */
+        .skeleton {
+            background: linear-gradient(90deg, #ebeef3 25%, #f1f4f9 50%, #ebeef3 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Stagger animation */
+        .stagger-in {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        .stagger-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+            transition: all 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24">
+    
+    <!-- Sticky TopAppBar -->
+    <header class="flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-40 backdrop-blur-md bg-surface/90 border-b border-outline-variant/30">
+        <div class="flex items-center gap-3">
+            <div class="p-2 rounded-full bg-primary/10">
+                <span class="material-symbols-outlined text-primary text-[24px]" data-icon="location_on">location_on</span>
+            </div>
+            <div class="flex flex-col">
+                <span class="font-label-sm text-label-sm text-secondary">Current Location</span>
+                <span id="user-location" class="font-label-md text-label-md text-on-surface">Loading...</span>
+            </div>
+        </div>
+        <div id="user-avatar" class="w-10 h-10 rounded-full bg-surface-container overflow-hidden border border-outline-variant ring-2 ring-primary/5 cursor-pointer" onclick="goToProfile()">
+            <img id="avatar-img" alt="User profile avatar" class="w-full h-full object-cover" src="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='40' height='40'><rect fill='%23ebeef3' width='40' height='40'/><text fill='%23727787' x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='16'>?</text></svg>"/>
+        </div>
+    </header>
+    
+    <main class="flex flex-col gap-stack-lg pt-stack-md">
+        <!-- Greeting Section -->
+        <section class="px-margin-mobile">
+            <h1 id="greeting-name" class="font-h1 text-h1 text-on-surface">Hello!</h1>
+            <p class="font-body-md text-body-md text-secondary">What plumbing service do you need today?</p>
+        </section>
+        
+        <!-- Premium Search Bar -->
+        <section class="px-margin-mobile">
+            <div class="relative group">
+                <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none search-icon">
+                    <span class="material-symbols-outlined text-secondary group-focus-within:text-primary transition-colors" data-icon="search">search</span>
+                </div>
+                <input 
+                    id="search-input"
+                    class="w-full h-14 pl-12 pr-12 bg-surface-container-low border-none rounded-2xl font-body-md text-on-surface focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-lowest transition-all shadow-sm"
+                    placeholder="Search for repair, installation..."
+                    type="text"
+                    oninput="handleSearch(this.value)"
+                />
+                <div class="absolute inset-y-0 right-4 flex items-center">
+                    <button class="p-2 text-secondary hover:text-primary transition-colors" onclick="showFilterSheet()">
+                        <span class="material-symbols-outlined text-[20px]" data-icon="tune">tune</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Service Categories -->
+        <section>
+            <div class="flex items-center justify-between px-margin-mobile mb-stack-sm">
+                <h2 class="font-h3 text-h3 text-on-surface">Categories</h2>
+                <button class="font-label-md text-label-md text-primary" onclick="showAllCategories()">View All</button>
+            </div>
+            <div class="flex overflow-x-auto gap-4 px-margin-mobile hide-scrollbar" id="categories-container">
+                <!-- Categories loaded dynamically -->
+                <div class="flex flex-col items-center gap-2 flex-shrink-0 group category-item cursor-pointer" onclick="selectCategory('general')">
+                    <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary category-icon">
+                        <span class="material-symbols-outlined text-[28px]" data-icon="home_repair_service">home_repair_service</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-on-surface font-medium">General</span>
+                </div>
+                <div class="flex flex-col items-center gap-2 flex-shrink-0 group category-item cursor-pointer" onclick="selectCategory('emergency')">
+                    <div class="w-16 h-16 rounded-2xl bg-error/10 flex items-center justify-center text-error category-icon">
+                        <span class="material-symbols-outlined text-[28px]" data-icon="emergency">emergency</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-on-surface font-medium">Emergency</span>
+                </div>
+                <div class="flex flex-col items-center gap-2 flex-shrink-0 group category-item cursor-pointer" onclick="selectCategory('installation')">
+                    <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center text-secondary category-icon">
+                        <span class="material-symbols-outlined text-[28px]" data-icon="plumbing">plumbing</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-on-surface font-medium">Installation</span>
+                </div>
+                <div class="flex flex-col items-center gap-2 flex-shrink-0 group category-item cursor-pointer" onclick="selectCategory('repair')">
+                    <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center text-secondary category-icon">
+                        <span class="material-symbols-outlined text-[28px]" data-icon="build">build</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-on-surface font-medium">Repair</span>
+                </div>
+                <div class="flex flex-col items-center gap-2 flex-shrink-0 group category-item cursor-pointer" onclick="selectCategory('maintenance')">
+                    <div class="w-16 h-16 rounded-2xl bg-surface-container flex items-center justify-center text-secondary category-icon">
+                        <span class="material-symbols-outlined text-[28px]" data-icon="construction">construction</span>
+                    </div>
+                    <span class="font-label-sm text-label-sm text-on-surface font-medium">Maintenance</span>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Featured Section -->
+        <section class="px-margin-mobile">
+            <div class="relative w-full h-48 rounded-3xl overflow-hidden shadow-lg group featured-card cursor-pointer" onclick="goToBooking()">
+                <img alt="Book a Plumber" class="absolute inset-0 w-full h-full object-cover transition-transform duration-700" src="https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=800&q=80"/>
+                <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent flex flex-col justify-center px-6">
+                    <h3 class="font-h2 text-h2 text-white mb-2">Book a Plumber</h3>
+                    <p class="font-body-sm text-body-sm text-white/90 max-w-[180px] mb-5">Certified experts available 24/7 for all your needs.</p>
+                    <button class="w-fit px-8 py-2.5 bg-primary text-white rounded-xl font-label-md text-label-md hover:brightness-110 active:scale-95 transition-all shadow-md shadow-primary/20">Book Now</button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Nearby Plumbers -->
+        <section class="px-margin-mobile flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <h2 class="font-h3 text-h3 text-on-surface">Nearby Plumbers</h2>
+                <button class="flex items-center gap-1 font-label-md text-label-md text-primary" onclick="showFilterSheet()">
+                    <span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+                    Filter
+                </button>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="plumbers-loading" class="space-y-4">
+                <div class="p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl flex gap-4">
+                    <div class="w-24 h-24 rounded-2xl skeleton flex-shrink-0"></div>
+                    <div class="flex-1 space-y-2 py-1">
+                        <div class="h-4 skeleton rounded w-3/4"></div>
+                        <div class="h-3 skeleton rounded w-1/2"></div>
+                        <div class="h-3 skeleton rounded w-2/3"></div>
+                    </div>
+                </div>
+                <div class="p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl flex gap-4">
+                    <div class="w-24 h-24 rounded-2xl skeleton flex-shrink-0"></div>
+                    <div class="flex-1 space-y-2 py-1">
+                        <div class="h-4 skeleton rounded w-3/4"></div>
+                        <div class="h-3 skeleton rounded w-1/2"></div>
+                        <div class="h-3 skeleton rounded w-2/3"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Plumbers List -->
+            <div id="plumbers-list" class="space-y-4 hidden">
+                <!-- Populated by JS -->
+            </div>
+            
+            <!-- Empty State -->
+            <div id="plumbers-empty" class="hidden text-center py-stack-lg">
+                <div class="w-16 h-16 bg-surface-container-high rounded-full flex items-center justify-center mx-auto mb-stack-md">
+                    <span class="material-symbols-outlined text-secondary text-[32px]">plumbing</span>
+                </div>
+                <h3 class="font-h3 text-h3 text-on-surface mb-1">No plumbers nearby</h3>
+                <p class="font-body-sm text-secondary">Try adjusting your location or filters</p>
+            </div>
+        </section>
+        
+        <!-- Active Bookings Section -->
+        <section id="active-bookings-section" class="px-margin-mobile hidden">
+            <div class="flex items-center justify-between mb-stack-sm">
+                <h2 class="font-h3 text-h3 text-on-surface">Active Bookings</h2>
+                <button class="font-label-md text-label-md text-primary" onclick="goToBookings()">View All</button>
+            </div>
+            <div id="active-bookings-list" class="space-y-3">
+                <!-- Populated by JS -->
+            </div>
+        </section>
+    </main>
+    
+    <!-- Sticky Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile pt-3 pb-safe bg-surface/90 backdrop-blur-md border-t border-outline-variant/30">
+        <a class="flex flex-col items-center justify-center text-primary group nav-item-active" href="dashboard.html">
+            <div class="px-4 py-1 rounded-xl bg-primary/10 mb-1">
+                <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">home</span>
+            </div>
+            <span class="font-label-sm text-label-sm font-semibold">Home</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-secondary hover:text-primary transition-all group" href="booking.html">
+            <div class="px-4 py-1 rounded-xl mb-1 group-hover:bg-primary/5 transition-all">
+                <span class="material-symbols-outlined text-[24px]" data-icon="plumbing">plumbing</span>
+            </div>
+            <span class="font-label-sm text-label-sm">Bookings</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-secondary hover:text-primary transition-all group" href="tracking.html">
+            <div class="px-4 py-1 rounded-xl mb-1 group-hover:bg-primary/5 transition-all relative">
+                <span class="material-symbols-outlined text-[24px]" data-icon="chat_bubble">chat_bubble</span>
+                <span id="msg-badge" class="absolute top-0 right-2 w-2 h-2 bg-error rounded-full border border-white hidden"></span>
+            </div>
+            <span class="font-label-sm text-label-sm">Messages</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-secondary hover:text-primary transition-all group" href="profile.html">
+            <div class="px-4 py-1 rounded-xl mb-1 group-hover:bg-primary/5 transition-all">
+                <span class="material-symbols-outlined text-[24px]" data-icon="person">person</span>
+            </div>
+            <span class="font-label-sm text-label-sm">Profile</span>
+        </a>
+    </nav>
+    
+    <!-- Filter Bottom Sheet (Hidden) -->
+    <div id="filter-sheet" hidden>
+        <div class="p-6">
+            <h3 class="font-h2 text-h2 text-on-surface mb-stack-lg">Filter Plumbers</h3>
+            
+            <div class="space-y-stack-lg">
+                <div>
+                    <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Service Type</label>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="px-4 py-2 rounded-xl bg-primary text-white font-label-sm" onclick="setFilter('type', 'all')">All</button>
+                        <button class="px-4 py-2 rounded-xl bg-surface-container-low text-on-surface-variant font-label-sm border border-outline-variant" onclick="setFilter('type', 'emergency')">Emergency</button>
+                        <button class="px-4 py-2 rounded-xl bg-surface-container-low text-on-surface-variant font-label-sm border border-outline-variant" onclick="setFilter('type', 'repair')">Repair</button>
+                        <button class="px-4 py-2 rounded-xl bg-surface-container-low text-on-surface-variant font-label-sm border border-outline-variant" onclick="setFilter('type', 'installation')">Installation</button>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Max Distance</label>
+                    <input type="range" min="1" max="50" value="10" class="w-full accent-primary" oninput="setFilter('distance', this.value)"/>
+                    <div class="flex justify-between mt-1">
+                        <span class="font-label-sm text-secondary">1 km</span>
+                        <span id="distance-value" class="font-label-sm text-primary font-semibold">10 km</span>
+                        <span class="font-label-sm text-secondary">50 km</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Min Rating</label>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-2 rounded-xl bg-primary text-white font-label-sm" onclick="setFilter('rating', 0)">Any</button>
+                        <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant font-label-sm border border-outline-variant" onclick="setFilter('rating', 4)">4+</button>
+                        <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant font-label-sm border border-outline-variant" onclick="setFilter('rating', 4.5)">4.5+</button>
+                    </div>
+                </div>
+            </div>
+            
+            <button class="w-full h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl mt-stack-lg active:scale-[0.98] transition-transform" onclick="applyFilters()">
+                Apply Filters
+            </button>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 z-[80] bg-surface/90 backdrop-blur-sm flex flex-col items-center justify-center">
+        <div class="relative">
+            <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-2xl">water_drop</span>
+            </div>
+        </div>
+        <p class="mt-4 font-body-md text-secondary animate-pulse">Loading...</p>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../supabase-config.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/booking.js"></script>
+    
+    <script>
+        // ============================================================
+        // CUSTOMER DASHBOARD LOGIC
+        // ============================================================
+        
+        let currentFilters = { type: 'all', distance: 10, rating: 0 };
+        let nearbyPlumbers = [];
+        let activeBookings = [];
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check auth
+            const authed = await requireAuth('customer');
+            if (!authed) return;
+            
+            // Load user data
+            await loadUserData();
+            
+            // Load nearby plumbers
+            await loadNearbyPlumbers();
+            
+            // Load active bookings
+            await loadActiveBookings();
+            
+            // Setup real-time subscriptions
+            setupRealtimeSubscriptions();
+        });
+        
+        // ============================================================
+        // LOAD USER DATA
+        // ============================================================
+        
+        async function loadUserData() {
+            const profile = getCurrentProfile();
+            
+            if (profile) {
+                // Update greeting
+                document.getElementById('greeting-name').textContent = `Hello, ${profile.name?.split(' ')[0] || 'there'}!`;
+                
+                // Update avatar
+                if (profile.avatar_url) {
+                    document.getElementById('avatar-img').src = profile.avatar_url;
+                }
+            }
+            
+            // Get location
+            try {
+                const location = await getCurrentLocation();
+                // Reverse geocode would go here - for now show generic
+                document.getElementById('user-location').textContent = 'Current Location';
+                
+                // Store location for filtering
+                localStorage.setItem('userLat', location.lat);
+                localStorage.setItem('userLng', location.lng);
+            } catch (error) {
+                console.log('Location not available:', error.message);
+                document.getElementById('user-location').textContent = 'Set Location';
+            }
+        }
+        
+        // ============================================================
+        // LOAD NEARBY PLUMBERS
+        // ============================================================
+        
+        async function loadNearbyPlumbers() {
+            const supabase = getSupabase();
+            if (!supabase) return;
+            
+            try {
+                // Show loading
+                document.getElementById('plumbers-loading').classList.remove('hidden');
+                document.getElementById('plumbers-list').classList.add('hidden');
+                document.getElementById('plumbers-empty').classList.add('hidden');
+                
+                // Get online providers with location
+                const { data: providers, error } = await supabase
+                    .from(DB_TABLES.PROVIDERS)
+                    .select(`
+                        id,
+                        is_online,
+                        rating,
+                        total_jobs,
+                        hourly_rate,
+                        current_location,
+                        profiles!inner(id, name, avatar_url)
+                    `)
+                    .eq('is_online', true)
+                    .order('rating', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                nearbyPlumbers = providers || [];
+                
+                // Hide loading
+                document.getElementById('plumbers-loading').classList.add('hidden');
+                
+                if (nearbyPlumbers.length === 0) {
+                    document.getElementById('plumbers-empty').classList.remove('hidden');
+                } else {
+                    document.getElementById('plumbers-list').classList.remove('hidden');
+                    renderPlumbers(nearbyPlumbers);
+                }
+                
+            } catch (error) {
+                console.error('Error loading plumbers:', error);
+                document.getElementById('plumbers-loading').classList.add('hidden');
+                document.getElementById('plumbers-empty').classList.remove('hidden');
+            }
+        }
+        
+        function renderPlumbers(plumbers) {
+            const container = document.getElementById('plumbers-list');
+            container.innerHTML = '';
+            
+            plumbers.forEach((plumber, index) => {
+                const card = createPlumberCard(plumber, index);
+                container.appendChild(card);
+            });
+            
+            // Stagger animation
+            setTimeout(() => {
+                container.querySelectorAll('.plumber-card').forEach((card, i) => {
+                    setTimeout(() => {
+                        card.classList.add('stagger-in');
+                        requestAnimationFrame(() => card.classList.add('visible'));
+                    }, i * 100);
+                });
+            }, 100);
+        }
+        
+        function createPlumberCard(plumber, index) {
+            const div = document.createElement('div');
+            div.className = 'plumber-card p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl flex gap-4 cursor-pointer stagger-in';
+            div.onclick = () => bookPlumber(plumber.id);
+            
+            const avatar = plumber.profiles?.avatar_url || `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='96'><rect fill='%23ebeef3' width='96' height='96'/><text fill='%23727787' x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='40'>?</text></svg>`;
+            const name = plumber.profiles?.name || 'Unknown';
+            const rating = plumber.rating || 5.0;
+            const jobs = plumber.total_jobs || 0;
+            const rate = plumber.hourly_rate || 45;
+            
+            // Calculate distance (mock for now)
+            const distance = (Math.random() * 5 + 0.5).toFixed(1);
+            const time = Math.round(distance * 8);
+            
+            div.innerHTML = `
+                <div class="w-24 h-24 rounded-2xl overflow-hidden flex-shrink-0 shadow-sm">
+                    <img alt="${name}" class="w-full h-full object-cover" src="${avatar}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2296%22 height=%2296%22><rect fill=%22%23ebeef3%22 width=%2296%22 height=%2296%22/><text fill=%22%23727787%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2240%22>?</text></svg>'"/>
+                </div>
+                <div class="flex flex-col flex-grow">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col">
+                            <div class="flex items-center gap-2 mb-0.5">
+                                <span class="font-label-md text-label-md text-on-surface">${name}</span>
+                                <div class="px-2 py-0.5 bg-[#20c997]/10 rounded-full flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[12px] text-[#20c997]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                                    <span class="text-[10px] font-bold text-[#20c997] uppercase">Pro</span>
+                                </div>
+                            </div>
+                            <span class="font-body-sm text-body-sm text-secondary">Expert Plumber</span>
+                        </div>
+                        <div class="flex items-center gap-1 px-1.5 py-0.5 bg-tertiary/10 text-tertiary rounded-lg">
+                            <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="font-label-md text-label-md">${rating.toFixed(1)}</span>
+                        </div>
+                    </div>
+                    <div class="mt-auto flex items-center justify-between pt-2">
+                        <div class="flex items-center gap-3 text-secondary">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary/70" data-icon="near_me">near_me</span>
+                                <span class="font-label-sm text-label-sm">${distance}km</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[18px] text-primary/70" data-icon="schedule">schedule</span>
+                                <span class="font-label-sm text-label-sm">${time} min</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-end">
+                            <span class="font-h3 text-h3 text-primary">$${rate}<span class="text-[12px] text-secondary font-normal ml-0.5">/hr</span></span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+        
+        // ============================================================
+        // ACTIVE BOOKINGS
+        // ============================================================
+        
+        async function loadActiveBookings() {
+            const supabase = getSupabase();
+            const userId = getUserId();
+            if (!supabase || !userId) return;
+            
+            try {
+                const { data: bookings, error } = await supabase
+                    .from(DB_TABLES.BOOKINGS)
+                    .select(`
+                        *,
+                        provider:provider_id(id, profiles(name, avatar_url))
+                    `)
+                    .eq('customer_id', userId)
+                    .in('status', ['pending', 'accepted', 'started'])
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                activeBookings = bookings || [];
+                
+                if (activeBookings.length > 0) {
+                    document.getElementById('active-bookings-section').classList.remove('hidden');
+                    renderActiveBookings();
+                }
+                
+            } catch (error) {
+                console.error('Error loading bookings:', error);
+            }
+        }
+        
+        function renderActiveBookings() {
+            const container = document.getElementById('active-bookings-list');
+            container.innerHTML = '';
+            
+            activeBookings.forEach(booking => {
+                const div = document.createElement('div');
+                div.className = 'p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl';
+                
+                const statusColors = {
+                    pending: 'bg-tertiary/10 text-tertiary',
+                    accepted: 'bg-primary/10 text-primary',
+                    started: 'bg-[#20c997]/10 text-[#20c997]'
+                };
+                
+                const statusLabels = {
+                    pending: 'Pending',
+                    accepted: 'Accepted',
+                    started: 'In Progress'
+                };
+                
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">${SERVICE_ICONS[booking.service_type] || 'plumbing'}</span>
+                            <span class="font-label-md text-on-surface">${SERVICE_DISPLAY_NAMES[booking.service_type] || booking.service_type}</span>
+                        </div>
+                        <span class="px-2 py-1 rounded-lg text-[10px] font-bold uppercase ${statusColors[booking.status]}">${statusLabels[booking.status]}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-secondary text-[16px]">schedule</span>
+                            <span class="font-label-sm text-secondary">${formatDate(booking.created_at, 'relative')}</span>
+                        </div>
+                        <span class="font-label-md text-primary">${formatCurrency(booking.price)}</span>
+                    </div>
+                    ${booking.status === 'accepted' || booking.status === 'started' ? `
+                        <button class="w-full mt-3 h-10 bg-primary text-white rounded-xl font-label-md active:scale-[0.98] transition-transform" onclick="trackBooking('${booking.id}')">
+                            Track Plumber
+                        </button>
+                    ` : ''}
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+        
+        // ============================================================
+        // REAL-TIME SUBSCRIPTIONS
+        // ============================================================
+        
+        function setupRealtimeSubscriptions() {
+            const supabase = getSupabase();
+            const userId = getUserId();
+            if (!supabase || !userId) return;
+            
+            // Listen for booking updates
+            supabase
+                .channel('customer-bookings-' + userId)
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: DB_TABLES.BOOKINGS,
+                    filter: 'customer_id=eq.' + userId
+                }, (payload) => {
+                    console.log('Booking update:', payload);
+                    
+                    if (payload.eventType === 'INSERT') {
+                        showToast('New booking created!', 'success');
+                        loadActiveBookings();
+                    } else if (payload.eventType === 'UPDATE') {
+                        const newStatus = payload.new.status;
+                        const oldStatus = payload.old.status;
+                        
+                        if (newStatus === 'accepted' && oldStatus === 'pending') {
+                            showToast('A plumber accepted your request!', 'success');
+                        } else if (newStatus === 'started') {
+                            showToast('Your service has started!', 'info');
+                        } else if (newStatus === 'completed') {
+                            showToast('Service completed! Please rate your experience.', 'success');
+                        }
+                        
+                        loadActiveBookings();
+                    }
+                })
+                .subscribe();
+        }
+        
+        // ============================================================
+        // SEARCH & FILTER
+        // ============================================================
+        
+        function handleSearch(query) {
+            if (!query.trim()) {
+                renderPlumbers(nearbyPlumbers);
+                return;
+            }
+            
+            const filtered = nearbyPlumbers.filter(p => {
+                const name = p.profiles?.name || '';
+                return name.toLowerCase().includes(query.toLowerCase());
+            });
+            
+            renderPlumbers(filtered);
+        }
+        
+        function selectCategory(category) {
+            // Navigate to booking with pre-selected category
+            window.location.href = `booking.html?category=${category}`;
+        }
+        
+        function showAllCategories() {
+            // Could show a modal with all categories
+            showToast('All categories coming soon!', 'info');
+        }
+        
+        function showFilterSheet() {
+            showBottomSheet('filter-sheet');
+        }
+        
+        function setFilter(key, value) {
+            currentFilters[key] = value;
+            
+            if (key === 'distance') {
+                document.getElementById('distance-value').textContent = value + ' km';
+            }
+        }
+        
+        function applyFilters() {
+            hideBottomSheet();
+            
+            let filtered = [...nearbyPlumbers];
+            
+            // Apply rating filter
+            if (currentFilters.rating > 0) {
+                filtered = filtered.filter(p => (p.rating || 0) >= currentFilters.rating);
+            }
+            
+            renderPlumbers(filtered);
+            showToast('Filters applied', 'success');
+        }
+        
+        // ============================================================
+        // NAVIGATION ACTIONS
+        // ============================================================
+        
+        function goToProfile() {
+            window.location.href = 'profile.html';
+        }
+        
+        function goToBooking() {
+            window.location.href = 'booking.html';
+        }
+        
+        function goToBookings() {
+            window.location.href = 'booking.html';
+        }
+        
+        function bookPlumber(providerId) {
+            window.location.href = `booking.html?provider=${providerId}`;
+        }
+        
+        function trackBooking(bookingId) {
+            window.location.href = `tracking.html?booking=${bookingId}`;
+        }
+        
+        // ============================================================
+        // GLOBAL EXPORTS
+        // ============================================================
+        
+        window.selectCategory = selectCategory;
+        window.showFilterSheet = showFilterSheet;
+        window.setFilter = setFilter;
+        window.applyFilters = applyFilters;
+        window.bookPlumber = bookPlumber;
+        window.trackBooking = trackBooking;
+        window.goToProfile = goToProfile;
+        window.goToBooking = goToBooking;
+        window.goToBookings = goToBookings;
+    </script>
+</body>
+</html>
+<!-- '''
+
+# Write to file
+with open('/mnt/agents/output/customer_dashboard.html', 'w') as f:
+    f.write(customer_dashboard)
+
+print("✅ customer/dashboard.html created successfully!")
+print(f"📄 File size: {len(customer_dashboard)} characters")
+print("\n📋 Features included:")
+print("  • Sticky Header with Location & Avatar")
+print("  • Personalized Greeting (from Supabase profile)")
+print("  • Search Bar with Filter")
+print("  • Service Categories (scrollable)")
+print("  • Featured Banner (Book Now CTA)")
+print("  • Nearby Plumbers List (from Supabase)")
+print("  • Active Bookings Section (real-time)")
+print("  • Bottom Navigation (4 tabs)")
+print("  • Filter Bottom Sheet")
+print("  • Skeleton Loading States")
+print("  • Real-time Supabase Subscriptions")
+print("  • Responsive Design") -->

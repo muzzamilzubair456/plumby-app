@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Plumbly Service Provider Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#5c5f60",
+                        "error": "#ba1a1a",
+                        "secondary-fixed": "#e1e3e4",
+                        "on-primary-container": "#ffffff",
+                        "inverse-on-surface": "#eef1f6",
+                        "on-tertiary-fixed": "#370e00",
+                        "on-secondary-fixed": "#191c1d",
+                        "outline-variant": "#c2c6d8",
+                        "inverse-primary": "#b1c5ff",
+                        "surface-bright": "#f7f9ff",
+                        "error-container": "#ffdad6",
+                        "primary-fixed": "#dae2ff",
+                        "on-surface-variant": "#424655",
+                        "tertiary-container": "#cf4b00",
+                        "surface-container-highest": "#e0e3e8",
+                        "on-secondary-container": "#626566",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "surface-container": "#ebeef3",
+                        "tertiary-fixed": "#ffdbce",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "on-primary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "surface-container-high": "#e5e8ee",
+                        "secondary-container": "#e1e3e4",
+                        "surface-dim": "#d7dadf",
+                        "on-primary-fixed-variant": "#00419e",
+                        "on-background": "#181c20",
+                        "on-surface": "#181c20",
+                        "background": "#f7f9ff",
+                        "surface-container-low": "#f1f4f9",
+                        "surface-variant": "#e0e3e8",
+                        "on-primary-fixed": "#001946",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#0d6efd",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed-variant": "#7f2b00",
+                        "primary-fixed-dim": "#b1c5ff",
+                        "on-secondary-fixed-variant": "#454748",
+                        "outline": "#727787",
+                        "surface-tint": "#0057ce",
+                        "primary": "#0057cd",
+                        "inverse-surface": "#2d3135",
+                        "tertiary": "#a63b00",
+                        "on-tertiary-container": "#ffffff",
+                        "surface": "#f7f9ff",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "section-padding": "32px",
+                        "stack-lg": "24px",
+                        "margin-mobile": "20px",
+                        "gutter-grid": "16px",
+                        "stack-md": "16px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "h3": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h2": ["Inter"],
+                        "body-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "h1": ["Inter"]
+                    },
+                    "fontSize": {
+                        "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f7f9ff;
+            -webkit-font-smoothing: antialiased;
+        }
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+    </style>
+</head>
+<body class="font-body-md text-on-surface">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-40 backdrop-blur-md bg-surface/80">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-[28px]" data-icon="water_drop">water_drop</span>
+<span class="font-h2 text-h2 font-bold text-primary">Plumbly</span>
+</div>
+<div class="flex items-center gap-4">
+<!-- Online/Offline Toggle Refined -->
+<button class="flex items-center bg-white rounded-full p-1 border border-outline-variant shadow-sm transition-all active:scale-95">
+<div class="flex items-center gap-1.5 px-3 py-1 bg-[#20c997]/10 text-[#0c6b4f] rounded-full">
+<div class="w-2 h-2 rounded-full bg-[#20c997] animate-pulse"></div>
+<span class="text-label-sm font-semibold">Online</span>
+</div>
+</button>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest border border-primary/20">
+<img alt="Alex Johnson" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDObkgO6-gkC8AHTaGpC2SACgRvEwr5lF8Qdxx450NEU9QUXBBR8bKcV3XP3h_0RiIGAK6FiacqAaigezc0JiPnd4Y_0LWNJmu_oPvxUYXA1NPFjjufzZvZte7hIuMNQsVgd4qy5QLqzkJyHrTgTzAU_smjan45KQH5RoP9xJ6sNr4grtGgLzjGLX3L46gClnUMOUJkDmB3F1Zi58Sp8mfWuJdd4OgA7m0WYlRQJQ1vl1gW0QIBaYVBXE3RT9AxxK90a5GHUXEtHyKX"/>
+</div>
+</div>
+</header>
+<main class="px-margin-mobile pt-stack-md pb-32">
+<!-- Greetings Section -->
+<section class="mb-stack-lg">
+<h1 class="font-h1 text-h1 text-on-surface tracking-tight">Hello, Alex</h1>
+<p class="font-body-md text-secondary mt-1">Ready for today's requests?</p>
+</section>
+<!-- Earnings Bento Grid Refined -->
+<section class="grid grid-cols-2 gap-gutter-grid mb-stack-lg">
+<!-- Today's Earnings -->
+<div class="col-span-2 bg-primary rounded-2xl p-6 relative overflow-hidden shadow-lg shadow-primary/20">
+<div class="relative z-10">
+<p class="text-white/70 font-label-md text-label-md">Today's Earnings</p>
+<div class="flex items-baseline gap-2 mt-1">
+<h2 class="text-white font-h1 text-[36px] font-bold">$240.50</h2>
+</div>
+<div class="mt-4 flex items-center gap-2 bg-white/15 w-fit px-3 py-1.5 rounded-full backdrop-blur-sm">
+<span class="material-symbols-outlined text-white text-[18px]" data-icon="trending_up">trending_up</span>
+<span class="text-white text-label-sm font-semibold">+12% from yesterday</span>
+</div>
+</div>
+<div class="absolute -right-8 -top-8 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+<div class="absolute -left-10 -bottom-10 w-48 h-48 bg-black/10 rounded-full blur-3xl"></div>
+</div>
+<!-- Completed Jobs -->
+<div class="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-sm">
+<div class="w-10 h-10 bg-primary/5 rounded-xl flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary" data-icon="task_alt">task_alt</span>
+</div>
+<p class="text-secondary font-label-sm text-label-sm uppercase tracking-wider font-semibold">Completed</p>
+<div class="flex items-center justify-between mt-1">
+<h3 class="font-h3 text-h3 text-on-surface">4 Jobs</h3>
+<span class="text-[10px] text-[#20c997] font-bold">+1</span>
+</div>
+</div>
+<!-- Rating -->
+<div class="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-5 shadow-sm">
+<div class="w-10 h-10 bg-tertiary-fixed/30 rounded-xl flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-tertiary" data-icon="grade" style="font-variation-settings: 'FILL' 1;">grade</span>
+</div>
+<p class="text-secondary font-label-sm text-label-sm uppercase tracking-wider font-semibold">Rating</p>
+<div class="flex items-center justify-between mt-1">
+<h3 class="font-h3 text-h3 text-on-surface">4.9</h3>
+<span class="text-[10px] text-primary font-bold">Top 5%</span>
+</div>
+</div>
+</section>
+<!-- Today's Jobs Section Refined -->
+<section>
+<div class="flex justify-between items-center mb-stack-md">
+<h2 class="font-h2 text-h2 text-on-surface">Today's Jobs</h2>
+<button class="text-primary font-label-md text-label-md flex items-center gap-1">
+                    View All
+                    <span class="material-symbols-outlined text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<div class="space-y-4">
+<!-- Job Card 1 -->
+<div class="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 flex gap-4 transition-all hover:border-primary/30 active:scale-[0.98]">
+<div class="w-20 h-20 rounded-xl bg-surface-container overflow-hidden shrink-0">
+<img alt="Kitchen Sink Repair" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-2nBFNKzhTSh9FOBpQ5-1XuobuUbpl5ZpoGQiDX0nz7tXZMli9c580qkZhQuuV3Lskp4SGM9sRP2ipMwiKHs0eW9sOVYGyhBWorSNadRbFDilqMndHwWdiIlR1Ql81q3wWjbSp5gOyXZ2OMSpo-QvbmuZwFrUrXyWU0RmvoSUB4l1Cyg928OHyEgttYDWl9jwcgpDOUg9n4sFp3bF_jKj4yoyVG7ZEEWqCBqsGO9cjZiVY1kk_Ol8GEEch0lTtnbfqbX9IxnB3QGx"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-semibold text-body-md text-on-surface">Kitchen Sink Repair</h4>
+<div class="flex items-center gap-1.5 text-secondary mt-0.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+<span class="text-label-sm font-medium">14:30 - 15:30</span>
+</div>
+</div>
+<span class="bg-surface-container-high text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Scheduled</span>
+</div>
+<div class="mt-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="account_circle">account_circle</span>
+<span class="text-body-sm font-medium text-on-surface-variant">Sarah Miller</span>
+</div>
+<span class="text-primary font-bold text-body-md">$85.00</span>
+</div>
+</div>
+</div>
+<!-- Job Card 2 - Active State -->
+<div class="bg-white border-2 border-primary rounded-2xl p-4 flex gap-4 shadow-md relative">
+<div class="absolute -left-1 top-4 bottom-4 w-1 bg-primary rounded-full"></div>
+<div class="w-20 h-20 rounded-xl bg-surface-container overflow-hidden shrink-0">
+<img alt="Water Heater Inspection" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCXuS0KPwdCRq-bAYoCZiiccR0wa-1r9KWlc6gzAlQMFjIGnFqtNg814AIldMPDHqD9TxsyZKRkWnhC269Sp4ADyoGT6lAsZ1KucSRR2MF3uYtvemPLSm2hdrzgn_khnt5R-EJqqBmO5LTc89oGkVA1g_CIf628RFl8tS9vXabVX4SJc3tuHWm1y5XxiGkHf4RgwY6eag9UweRcDYg2kItlgXha9gTYgoawLqEzxPwH2i4rfthPC_peRl0kK51iRZMowLhJRgSU8ST_"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-semibold text-body-md text-on-surface">Water Heater Inspection</h4>
+<div class="flex items-center gap-1.5 text-primary mt-0.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="timer">timer</span>
+<span class="text-label-sm font-semibold">In Progress</span>
+</div>
+</div>
+<span class="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Active</span>
+</div>
+<div class="mt-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="account_circle">account_circle</span>
+<span class="text-body-sm font-medium text-on-surface-variant">David Chen</span>
+</div>
+<span class="text-primary font-extrabold text-body-md">$150.00</span>
+</div>
+</div>
+</div>
+<!-- Job Card 3 -->
+<div class="bg-surface-container-lowest border border-outline-variant/60 rounded-2xl p-4 flex gap-4 transition-all hover:border-primary/30 active:scale-[0.98]">
+<div class="w-20 h-20 rounded-xl bg-surface-container overflow-hidden shrink-0">
+<img alt="Drain Cleaning" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFZ41gZCLGyJ3X2bLidftaYyv3msVZdjvcymRsyH35MIWM1W6K1Q0JDcV0WEeOk-n4LRDmWa2GJWPzTGsvo3pR6KcyDWe5fbfeXsC-RmJ8h-L05YLjC_j5UvjEUkp5CcXxynw9Fai_n6yJ_43D82ydypdyEWU6PWs7c3C6MfT1sJ4nQGIhwpPF9FT8bOCMMkKayLGmb58AUmSBVwpLCPBYUinjSoIol2GxTu1ons4IGxZ9DGHCNfz2zuhU1lJTCJ0b06-si_ZRhsGF"/>
+</div>
+<div class="flex-1 flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<div>
+<h4 class="font-semibold text-body-md text-on-surface">Drain Cleaning</h4>
+<div class="flex items-center gap-1.5 text-secondary mt-0.5">
+<span class="material-symbols-outlined text-[14px]" data-icon="schedule">schedule</span>
+<span class="text-label-sm font-medium">19:15 - 20:00</span>
+</div>
+</div>
+<span class="bg-surface-container-high text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider">Scheduled</span>
+</div>
+<div class="mt-2 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px] text-secondary" data-icon="account_circle">account_circle</span>
+<span class="text-body-sm font-medium text-on-surface-variant">Emma Wilson</span>
+</div>
+<span class="text-primary font-bold text-body-md">$65.00</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar Refined Sticky -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile pt-3 pb-safe bg-white border-t border-outline-variant/40 shadow-[0_-4px_12px_rgba(0,0,0,0.03)]">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center group" href="#">
+<div class="flex flex-col items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[26px]" data-icon="grid_view" style="font-variation-settings: 'FILL' 1;">grid_view</span>
+<span class="text-[11px] font-bold mt-0.5">Dashboard</span>
+</div>
+</a>
+<!-- Bookings -->
+<a class="flex flex-col items-center justify-center group" href="#">
+<div class="flex flex-col items-center justify-center text-secondary transition-colors hover:text-primary">
+<span class="material-symbols-outlined text-[26px]" data-icon="calendar_today">calendar_today</span>
+<span class="text-[11px] font-medium mt-0.5">Schedule</span>
+</div>
+</a>
+<!-- Messages -->
+<a class="flex flex-col items-center justify-center group" href="#">
+<div class="flex flex-col items-center justify-center text-secondary transition-colors hover:text-primary">
+<div class="relative">
+<span class="material-symbols-outlined text-[26px]" data-icon="chat">chat</span>
+<span class="absolute top-0 -right-1 w-2 h-2 bg-error rounded-full border border-white"></span>
+</div>
+<span class="text-[11px] font-medium mt-0.5">Messages</span>
+</div>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center group" href="#">
+<div class="flex flex-col items-center justify-center text-secondary transition-colors hover:text-primary">
+<span class="material-symbols-outlined text-[26px]" data-icon="settings">settings</span>
+<span class="text-[11px] font-medium mt-0.5">Settings</span>
+</div>
+</a>
+</nav>
+</body></html>

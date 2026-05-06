@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#5c5f60",
+                    "error": "#ba1a1a",
+                    "secondary-fixed": "#e1e3e4",
+                    "on-primary-container": "#ffffff",
+                    "inverse-on-surface": "#eef1f6",
+                    "on-tertiary-fixed": "#370e00",
+                    "on-secondary-fixed": "#191c1d",
+                    "outline-variant": "#c2c6d8",
+                    "inverse-primary": "#b1c5ff",
+                    "surface-bright": "#f7f9ff",
+                    "error-container": "#ffdad6",
+                    "primary-fixed": "#dae2ff",
+                    "on-surface-variant": "#424655",
+                    "tertiary-container": "#cf4b00",
+                    "surface-container-highest": "#e0e3e8",
+                    "on-secondary-container": "#626566",
+                    "secondary-fixed-dim": "#c5c7c8",
+                    "surface-container": "#ebeef3",
+                    "tertiary-fixed": "#ffdbce",
+                    "tertiary-fixed-dim": "#ffb599",
+                    "on-primary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-container-high": "#e5e8ee",
+                    "secondary-container": "#e1e3e4",
+                    "surface-dim": "#d7dadf",
+                    "on-primary-fixed-variant": "#00419e",
+                    "on-background": "#181c20",
+                    "on-surface": "#181c20",
+                    "background": "#f7f9ff",
+                    "surface-container-low": "#f1f4f9",
+                    "surface-variant": "#e0e3e8",
+                    "on-primary-fixed": "#001946",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#0d6efd",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary-fixed-variant": "#7f2b00",
+                    "primary-fixed-dim": "#b1c5ff",
+                    "on-secondary-fixed-variant": "#454748",
+                    "outline": "#727787",
+                    "surface-tint": "#0057ce",
+                    "primary": "#0057cd",
+                    "inverse-surface": "#2d3135",
+                    "tertiary": "#a63b00",
+                    "on-tertiary-container": "#ffffff",
+                    "surface": "#f7f9ff",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-sm": "8px",
+                    "section-padding": "32px",
+                    "stack-lg": "24px",
+                    "margin-mobile": "20px",
+                    "gutter-grid": "16px",
+                    "stack-md": "16px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "h3": ["Inter"],
+                    "label-md": ["Inter"],
+                    "h2": ["Inter"],
+                    "body-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "h1": ["Inter"]
+            },
+            "fontSize": {
+                    "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                    "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                    "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-40 backdrop-blur-md bg-surface/80 dark:bg-surface-dim/80">
+<div class="flex items-center gap-stack-sm">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed" data-icon="location_on">location_on</span>
+<h1 class="font-h2 text-h2 font-bold text-primary dark:text-primary-fixed">Plumbly</h1>
+</div>
+<div class="h-10 w-10 rounded-full overflow-hidden border border-outline-variant">
+<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A professional close-up headshot of a friendly plumber in his 40s wearing a clean navy blue polo shirt with a subtle company logo. The background is a brightly lit, modern white studio setting that communicates trust and professional excellence. The lighting is soft and high-key, aligning with a premium minimalist light-mode user interface. He has a warm, confident smile that builds immediate customer rapport." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJJU71U-NkR3-uC9wQdRjbRgdqmWbspf1FkXFquxdgICcWu3RVIU2j83sk5i9O-sTD6GzIGNHbASTlFgK-DSej3ZWwtciunRxN_iqdCZnMzNO58j3O2S3pNhDh7rUAn5B3NMVO-NDPfDgK9LFtY9u6YJ2ajHp9laR9N4CjHAbpDejvSRizUv2yuT4aGecXmmkrxAbi6gHN5i7rHSCOtO-B60HbNq7QMx_1vdUBxe0UJVDYaKn8ekxLm0raa_Tv8wmR-y_i9F3gq4lK"/>
+</div>
+</header>
+<main class="px-margin-mobile pt-stack-lg flex flex-col gap-stack-lg">
+<!-- Profile Hero Section -->
+<section class="flex flex-col items-center gap-stack-md pt-4">
+<div class="relative">
+<div class="w-24 h-24 rounded-full overflow-hidden ring-4 ring-surface-container-high shadow-lg">
+<img alt="Alex Johnson" class="w-full h-full object-cover" data-alt="A detailed professional portrait of a master plumber named Alex Johnson, shown from the chest up in a clean white environment. He is wearing a high-quality professional work uniform in deep blue. The lighting is bright and even, highlighting a clean-shaven, approachable face with a friendly expression. The aesthetic is extremely clean and high-end, fitting a corporate modern design system with a light-mode palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmcARzAhX9rO1ieWmI1KJSm1_CavjvFI8wiqYA__zjF3uAo-h0Sh7eiwJ65geQCh-smQ4nc8KW2XfqwMUE4UVJ2bIMvV5yLzVauEbeGZFEuxqNQpJscbqsjix4RotGZEq80SA9XYERqWIuWySKMfGFgFGeLC36UZrRVRYJxkqmwAPw07nKiQMRsGbfQJFMfQIZATcy2VldidU87u4toGnRAgmhcCIgJvd_vMSdzPsBbj8yy296r0IyYrUjNbox3H684LeAl_SEouLV"/>
+</div>
+<div class="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1.5 flex items-center justify-center border-2 border-white">
+<span class="material-symbols-outlined text-[16px]" data-icon="verified" style="font-variation-settings: 'FILL' 1;">verified</span>
+</div>
+</div>
+<div class="text-center">
+<h2 class="font-h2 text-h2 text-on-surface">Alex Johnson</h2>
+<p class="font-body-md text-secondary">Verified Premium Member</p>
+<div class="flex items-center justify-center gap-1 mt-1">
+<span class="material-symbols-outlined text-tertiary text-[18px]" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label-md text-on-surface">4.9</span>
+<span class="font-label-sm text-secondary">(128 Reviews)</span>
+</div>
+</div>
+</section>
+<!-- Quick Stats Bento Grid -->
+<section class="grid grid-cols-2 gap-gutter-grid">
+<div class="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant shadow-sm flex flex-col gap-unit">
+<span class="font-label-sm text-secondary uppercase tracking-wider">Total Earnings</span>
+<span class="font-h3 text-h3 text-on-surface">$12,450</span>
+</div>
+<div class="bg-surface-container-lowest p-stack-md rounded-xl border border-outline-variant shadow-sm flex flex-col gap-unit">
+<span class="font-label-sm text-secondary uppercase tracking-wider">Jobs Done</span>
+<span class="font-h3 text-h3 text-on-surface">342</span>
+</div>
+</section>
+<!-- Profile Menu Items -->
+<nav class="flex flex-col gap-stack-sm mt-4">
+<!-- Profile Info -->
+<button class="flex items-center justify-between p-stack-md bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-xl group active:scale-[0.98] duration-150">
+<div class="flex items-center gap-stack-md">
+<div class="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+</div>
+<span class="font-label-md text-on-surface-variant group-hover:text-on-surface">Profile Info</span>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Ratings & Reviews -->
+<button class="flex items-center justify-between p-stack-md bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-xl group active:scale-[0.98] duration-150">
+<div class="flex items-center gap-stack-md">
+<div class="w-10 h-10 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined" data-icon="reviews">reviews</span>
+</div>
+<span class="font-label-md text-on-surface-variant group-hover:text-on-surface">Ratings &amp; Reviews</span>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Earnings History -->
+<button class="flex items-center justify-between p-stack-md bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-xl group active:scale-[0.98] duration-150">
+<div class="flex items-center gap-stack-md">
+<div class="w-10 h-10 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" data-icon="account_balance_wallet">account_balance_wallet</span>
+</div>
+<span class="font-label-md text-on-surface-variant group-hover:text-on-surface">Earnings History</span>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</button>
+<!-- Support -->
+<button class="flex items-center justify-between p-stack-md bg-surface-container-low hover:bg-surface-container-high transition-colors rounded-xl group active:scale-[0.98] duration-150">
+<div class="flex items-center gap-stack-md">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="headset_mic">headset_mic</span>
+</div>
+<span class="font-label-md text-on-surface-variant group-hover:text-on-surface">Support</span>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</button>
+</nav>
+<!-- Switch Mode -->
+<div class="mt-4 p-stack-lg bg-primary-container/5 rounded-2xl border border-primary/10 flex items-center justify-between">
+<div>
+<h4 class="font-label-md text-primary">Switch to Client</h4>
+<p class="font-body-sm text-secondary">Looking to book a service?</p>
+</div>
+<button class="bg-primary text-on-primary-container px-4 py-2 rounded-xl font-label-md hover:bg-primary/90 transition-all active:scale-95 duration-150">
+                Switch
+            </button>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile py-stack-sm pb-safe bg-surface dark:bg-surface-dim border-t border-outline-variant dark:border-outline shadow-lg dark:shadow-none">
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed hover:text-primary transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-sm text-label-sm">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed hover:text-primary transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="plumbing">plumbing</span>
+<span class="font-label-sm text-label-sm">Bookings</span>
+</button>
+<button class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed hover:text-primary transition-all active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
+<span class="font-label-sm text-label-sm">Messages</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-semibold bg-primary-container/10 rounded-xl px-3 py-1 active:scale-90 duration-200">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-label-sm text-label-sm">Profile</span>
+</button>
+</nav>
+</body></html>

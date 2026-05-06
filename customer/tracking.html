@@ -1,0 +1,1128 @@
+
+<!-- # Create the customer/booking.html file with complete booking functionality
+# This preserves the exact Stitch.ai UI design while adding Supabase functionality -->
+
+booking_html = '''<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <meta name="theme-color" content="#0057cd"/>
+    <title>Book Service | Plumbly</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-tertiary-fixed-variant": "#7f2b00",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#0d6efd",
+                        "inverse-surface": "#2d3135",
+                        "tertiary-fixed": "#ffdbce",
+                        "surface-container-low": "#f1f4f9",
+                        "surface-container-high": "#e5e8ee",
+                        "tertiary-fixed-dim": "#ffb599",
+                        "outline-variant": "#c2c6d8",
+                        "on-tertiary-fixed": "#370e00",
+                        "primary": "#0057cd",
+                        "surface-container": "#ebeef3",
+                        "on-primary-fixed-variant": "#00419e",
+                        "on-tertiary-container": "#ffffff",
+                        "on-primary-container": "#ffffff",
+                        "on-background": "#181c20",
+                        "error": "#ba1a1a",
+                        "background": "#f7f9ff",
+                        "secondary-fixed": "#e1e3e4",
+                        "secondary-container": "#e1e3e4",
+                        "on-secondary": "#ffffff",
+                        "surface-dim": "#d7dadf",
+                        "surface": "#f7f9ff",
+                        "on-primary-fixed": "#001946",
+                        "inverse-on-surface": "#eef1f6",
+                        "primary-fixed": "#dae2ff",
+                        "on-surface": "#181c20",
+                        "surface-tint": "#0057ce",
+                        "on-error-container": "#93000a",
+                        "tertiary-container": "#cf4b00",
+                        "on-secondary-fixed-variant": "#454748",
+                        "surface-bright": "#f7f9ff",
+                        "secondary-fixed-dim": "#c5c7c8",
+                        "surface-container-highest": "#e0e3e8",
+                        "surface-variant": "#e0e3e8",
+                        "tertiary": "#a63b00",
+                        "outline": "#727787",
+                        "secondary": "#5c5f60",
+                        "on-secondary-fixed": "#191c1d",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#b1c5ff",
+                        "error-container": "#ffdad6",
+                        "on-primary": "#ffffff",
+                        "on-surface-variant": "#424655",
+                        "on-secondary-container": "#626566",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#b1c5ff"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    spacing: {
+                        "unit": "4px",
+                        "section-padding": "32px",
+                        "gutter-grid": "16px",
+                        "margin-mobile": "20px",
+                        "stack-lg": "24px",
+                        "stack-sm": "8px",
+                        "stack-md": "16px"
+                    },
+                    fontFamily: {
+                        "h3": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h1": ["Inter"],
+                        "label-md": ["Inter"],
+                        "h2": ["Inter"],
+                        "body-sm": ["Inter"]
+                    },
+                    fontSize: {
+                        "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        body { min-height: 100dvh; }
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        
+        /* Service type selection */
+        .service-option {
+            transition: all 0.3s cubic-bezier(0.33, 1, 0.68, 1);
+            cursor: pointer;
+        }
+        .service-option:hover {
+            transform: translateY(-2px);
+        }
+        .service-option.selected {
+            border-color: #0057cd;
+            background: rgba(0, 87, 205, 0.05);
+            box-shadow: 0 4px 16px rgba(0, 87, 205, 0.1);
+        }
+        .service-option.selected .service-icon {
+            background: #0057cd;
+            color: white;
+        }
+        
+        /* Time slot selection */
+        .time-slot {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .time-slot:hover {
+            border-color: #0057cd;
+        }
+        .time-slot.selected {
+            background: #0057cd;
+            color: white;
+            border-color: #0057cd;
+        }
+        .time-slot.selected .slot-price {
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* Address card */
+        .address-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .address-card:hover {
+            border-color: #0057cd;
+            background: rgba(0, 87, 205, 0.02);
+        }
+        .address-card.selected {
+            border-color: #0057cd;
+            background: rgba(0, 87, 205, 0.05);
+        }
+        
+        /* Form step animation */
+        .form-step {
+            display: none;
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        .form-step.active {
+            display: block;
+            animation: stepIn 0.4s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+        }
+        @keyframes stepIn {
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* Progress bar */
+        .progress-bar {
+            transition: width 0.5s cubic-bezier(0.33, 1, 0.68, 1);
+        }
+        
+        /* Provider card in booking */
+        .provider-select-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .provider-select-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+        }
+        .provider-select-card.selected {
+            border-color: #0057cd;
+            background: rgba(0, 87, 205, 0.05);
+        }
+        
+        /* Price breakdown */
+        .price-row {
+            transition: all 0.2s ease;
+        }
+        
+        /* Bottom sheet for map */
+        .map-sheet {
+            transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+        }
+        
+        /* Loading state */
+        .booking-loading {
+            background: linear-gradient(90deg, #ebeef3 25%, #f1f4f9 50%, #ebeef3 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24">
+    
+    <!-- Sticky TopAppBar -->
+    <header class="flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-40 backdrop-blur-md bg-surface/90 border-b border-outline-variant/30">
+        <button class="p-2 rounded-full hover:bg-surface-container transition-colors" onclick="goBack()">
+            <span class="material-symbols-outlined text-on-surface text-[24px]">arrow_back</span>
+        </button>
+        <h1 class="font-h3 text-h3 text-on-surface">Book Service</h1>
+        <div class="w-10"></div>
+    </header>
+    
+    <!-- Progress Bar -->
+    <div class="px-margin-mobile mt-stack-sm">
+        <div class="flex items-center gap-2 mb-1">
+            <span id="step-label" class="font-label-sm text-secondary">Step 1 of 4</span>
+        </div>
+        <div class="h-1.5 bg-surface-container-high rounded-full overflow-hidden">
+            <div id="progress-bar" class="progress-bar h-full bg-primary rounded-full" style="width: 25%"></div>
+        </div>
+    </div>
+    
+    <main class="flex flex-col gap-stack-lg pt-stack-md px-margin-mobile">
+        
+        <!-- Step 1: Service Type -->
+        <section id="step-1" class="form-step active">
+            <div class="mb-stack-md">
+                <h2 class="font-h2 text-h2 text-on-surface mb-1">What do you need?</h2>
+                <p class="font-body-md text-secondary">Select the type of plumbing service</p>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-3" id="service-options">
+                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="emergency" onclick="selectService('emergency')">
+                    <div class="service-icon w-12 h-12 bg-error/10 rounded-xl flex items-center justify-center mb-3 transition-all">
+                        <span class="material-symbols-outlined text-error text-[24px]">emergency</span>
+                    </div>
+                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Emergency</h3>
+                    <p class="font-label-sm text-secondary">Urgent repairs needed</p>
+                </div>
+                
+                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="repair" onclick="selectService('repair')">
+                    <div class="service-icon w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-3 transition-all">
+                        <span class="material-symbols-outlined text-primary text-[24px]">build</span>
+                    </div>
+                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Repair</h3>
+                    <p class="font-label-sm text-secondary">Fix leaks & pipes</p>
+                </div>
+                
+                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="installation" onclick="selectService('installation')">
+                    <div class="service-icon w-12 h-12 bg-tertiary/10 rounded-xl flex items-center justify-center mb-3 transition-all">
+                        <span class="material-symbols-outlined text-tertiary text-[24px]">plumbing</span>
+                    </div>
+                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Installation</h3>
+                    <p class="font-label-sm text-secondary">New fixtures & pipes</p>
+                </div>
+                
+                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="maintenance" onclick="selectService('maintenance')">
+                    <div class="service-icon w-12 h-12 bg-[#20c997]/10 rounded-xl flex items-center justify-center mb-3 transition-all">
+                        <span class="material-symbols-outlined text-[#20c997] text-[24px]">construction</span>
+                    </div>
+                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Maintenance</h3>
+                    <p class="font-label-sm text-secondary">Regular checkups</p>
+                </div>
+                
+                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="drain_cleaning" onclick="selectService('drain_cleaning')">
+                    <div class="service-icon w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-3 transition-all">
+                        <span class="material-symbols-outlined text-primary text-[24px]">cleaning_services</span>
+                    </div>
+                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Drain Cleaning</h3>
+                    <p class="font-label-sm text-secondary">Unclog drains</p>
+                </div>
+                
+                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="water_heater" onclick="selectService('water_heater')">
+                    <div class="service-icon w-12 h-12 bg-tertiary/10 rounded-xl flex items-center justify-center mb-3 transition-all">
+                        <span class="material-symbols-outlined text-tertiary text-[24px]">water_heater</span>
+                    </div>
+                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Water Heater</h3>
+                    <p class="font-label-sm text-secondary">Repair or replace</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Step 2: Location & Description -->
+        <section id="step-2" class="form-step">
+            <div class="mb-stack-md">
+                <h2 class="font-h2 text-h2 text-on-surface mb-1">Where & What?</h2>
+                <p class="font-body-md text-secondary">Enter your location and describe the issue</p>
+            </div>
+            
+            <!-- Address Selection -->
+            <div class="mb-stack-lg">
+                <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Service Address</label>
+                
+                <!-- Saved Addresses -->
+                <div id="saved-addresses" class="space-y-3 mb-3">
+                    <!-- Populated by JS -->
+                </div>
+                
+                <!-- Add New Address -->
+                <button class="w-full p-4 border-2 border-dashed border-outline-variant rounded-2xl flex items-center gap-3 text-secondary hover:border-primary hover:text-primary transition-all" onclick="showAddressMap()">
+                    <span class="material-symbols-outlined text-[24px]">add_location</span>
+                    <span class="font-label-md">Add New Address</span>
+                </button>
+            </div>
+            
+            <!-- Description -->
+            <div class="mb-stack-lg">
+                <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Describe the Issue</label>
+                <textarea 
+                    id="issue-description"
+                    class="w-full h-32 p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 focus:outline-none resize-none"
+                    placeholder="e.g., Kitchen sink is leaking from the pipe under the cabinet..."
+                    oninput="updateBookingData('description', this.value)"
+                ></textarea>
+                <p class="font-label-sm text-secondary mt-1 text-right"><span id="desc-count">0</span>/500</p>
+            </div>
+            
+            <!-- Photo Upload -->
+            <div class="mb-stack-lg">
+                <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Add Photos (Optional)</label>
+                <div class="flex gap-3 flex-wrap" id="photo-preview">
+                    <button class="w-20 h-20 border-2 border-dashed border-outline-variant rounded-xl flex items-center justify-center text-secondary hover:border-primary hover:text-primary transition-all" onclick="document.getElementById('photo-input').click()">
+                        <span class="material-symbols-outlined text-[24px]">add_a_photo</span>
+                    </button>
+                </div>
+                <input type="file" id="photo-input" class="hidden" accept="image/*" multiple onchange="handlePhotoUpload(this.files)">
+            </div>
+        </section>
+        
+        <!-- Step 3: Select Provider -->
+        <section id="step-3" class="form-step">
+            <div class="mb-stack-md">
+                <h2 class="font-h2 text-h2 text-on-surface mb-1">Choose a Plumber</h2>
+                <p class="font-body-md text-secondary">Available providers near you</p>
+            </div>
+            
+            <!-- Provider List -->
+            <div id="provider-list" class="space-y-3">
+                <!-- Populated by JS -->
+            </div>
+            
+            <!-- Loading State -->
+            <div id="provider-loading" class="space-y-3">
+                <div class="p-4 bg-surface-container-lowest rounded-2xl flex gap-4">
+                    <div class="w-16 h-16 rounded-xl booking-loading flex-shrink-0"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="h-4 booking-loading rounded w-2/3"></div>
+                        <div class="h-3 booking-loading rounded w-1/2"></div>
+                    </div>
+                </div>
+                <div class="p-4 bg-surface-container-lowest rounded-2xl flex gap-4">
+                    <div class="w-16 h-16 rounded-xl booking-loading flex-shrink-0"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="h-4 booking-loading rounded w-2/3"></div>
+                        <div class="h-3 booking-loading rounded w-1/2"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Step 4: Review & Confirm -->
+        <section id="step-4" class="form-step">
+            <div class="mb-stack-md">
+                <h2 class="font-h2 text-h2 text-on-surface mb-1">Review & Confirm</h2>
+                <p class="font-body-md text-secondary">Double-check your booking details</p>
+            </div>
+            
+            <!-- Booking Summary Card -->
+            <div class="bg-surface-container-lowest rounded-2xl p-stack-lg mb-stack-lg border border-outline-variant/50">
+                <!-- Service Type -->
+                <div class="flex items-center gap-3 mb-stack-md pb-stack-md border-b border-outline-variant/30">
+                    <div id="summary-icon" class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-[24px]">plumbing</span>
+                    </div>
+                    <div>
+                        <h3 id="summary-service" class="font-h3 text-h3 text-on-surface">Installation</h3>
+                        <p id="summary-category" class="font-body-sm text-secondary">Plumbing Service</p>
+                    </div>
+                </div>
+                
+                <!-- Details -->
+                <div class="space-y-3 mb-stack-md">
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">location_on</span>
+                        <div>
+                            <p class="font-label-sm text-secondary">Address</p>
+                            <p id="summary-address" class="font-body-md text-on-surface">123 Main Street, Apt 4B</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">description</span>
+                        <div>
+                            <p class="font-label-sm text-secondary">Description</p>
+                            <p id="summary-description" class="font-body-md text-on-surface">Kitchen sink leaking...</p>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">person</span>
+                        <div>
+                            <p class="font-label-sm text-secondary">Provider</p>
+                            <p id="summary-provider" class="font-body-md text-on-surface">John Smith</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Price Breakdown -->
+                <div class="border-t border-outline-variant/30 pt-stack-md">
+                    <h4 class="font-label-md text-label-md text-secondary mb-3">Price Estimate</h4>
+                    <div class="space-y-2">
+                        <div class="flex justify-between price-row">
+                            <span class="font-body-md text-secondary">Base Service Fee</span>
+                            <span id="price-base" class="font-body-md text-on-surface">$45.00</span>
+                        </div>
+                        <div class="flex justify-between price-row">
+                            <span class="font-body-md text-secondary">Estimated Labor (2 hrs)</span>
+                            <span id="price-labor" class="font-body-md text-on-surface">$90.00</span>
+                        </div>
+                        <div class="flex justify-between price-row">
+                            <span class="font-body-md text-secondary">Platform Fee</span>
+                            <span id="price-platform" class="font-body-md text-on-surface">$5.00</span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-outline-variant/30">
+                            <span class="font-h3 text-h3 text-on-surface">Total Estimate</span>
+                            <span id="price-total" class="font-h3 text-h3 text-primary">$140.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Payment Method -->
+            <div class="mb-stack-lg">
+                <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Payment Method</label>
+                <div class="p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl flex items-center gap-3">
+                    <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary">payments</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-label-md text-on-surface">Pay after service</p>
+                        <p class="font-label-sm text-secondary">Cash or card to provider</p>
+                    </div>
+                    <span class="material-symbols-outlined text-primary">check_circle</span>
+                </div>
+            </div>
+            
+            <!-- Terms -->
+            <p class="font-label-sm text-secondary text-center mb-stack-md">
+                By confirming, you agree to our <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Cancellation Policy</a>
+            </p>
+        </section>
+    </main>
+    
+    <!-- Bottom Action Bar -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-t border-outline-variant/30 px-margin-mobile py-4 pb-safe">
+        <div class="flex gap-3">
+            <button id="btn-back" class="flex-1 h-14 bg-surface-container-lowest border border-outline-variant text-on-surface font-h3 text-h3 rounded-2xl active:scale-[0.98] transition-transform hidden" onclick="prevStep()">
+                Back
+            </button>
+            <button id="btn-next" class="flex-1 h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform" onclick="nextStep()">
+                Continue
+            </button>
+        </div>
+    </div>
+    
+    <!-- Address Map Sheet (Hidden) -->
+    <div id="address-map-sheet" hidden>
+        <div class="p-6">
+            <h3 class="font-h2 text-h2 text-on-surface mb-stack-md">Select Location</h3>
+            <div id="map-container" class="w-full h-64 bg-surface-container-high rounded-2xl mb-stack-md flex items-center justify-center">
+                <p class="font-body-md text-secondary">Map loading...</p>
+            </div>
+            <input 
+                id="address-input"
+                class="w-full h-14 px-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 focus:outline-none mb-stack-md"
+                placeholder="Enter full address"
+                type="text"
+            />
+            <button class="w-full h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl active:scale-[0.98] transition-transform" onclick="confirmAddress()">
+                Confirm Address
+            </button>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="booking-overlay" class="hidden fixed inset-0 z-[80] bg-surface/90 backdrop-blur-sm flex flex-col items-center justify-center">
+        <div class="relative">
+            <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-2xl">water_drop</span>
+            </div>
+        </div>
+        <p class="mt-4 font-body-md text-secondary animate-pulse">Creating your booking...</p>
+    </div>
+    
+    <!-- Success Modal -->
+    <div id="success-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-surface rounded-3xl p-stack-lg max-w-sm w-full text-center shadow-2xl">
+            <div class="w-20 h-20 bg-[#20c997]/10 rounded-full flex items-center justify-center mx-auto mb-stack-md">
+                <span class="material-symbols-outlined text-[#20c997] text-[40px]">check_circle</span>
+            </div>
+            <h3 class="font-h2 text-h2 text-on-surface mb-2">Booking Confirmed!</h3>
+            <p class="font-body-md text-secondary mb-stack-lg">Your plumber will arrive soon. You can track them in real-time.</p>
+            <button class="w-full h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl mb-3 active:scale-[0.98] transition-transform" onclick="goToTracking()">
+                Track Plumber
+            </button>
+            <button class="w-full h-14 bg-surface-container-low text-on-surface font-h3 text-h3 rounded-2xl active:scale-[0.98] transition-transform" onclick="goToDashboard()">
+                Go to Dashboard
+            </button>
+        </div>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../supabase-config.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/map.js"></script>
+    
+    <script>
+        // ============================================================
+        // BOOKING FORM STATE
+        // ============================================================
+        
+        let currentStep = 1;
+        const totalSteps = 4;
+        
+        const bookingData = {
+            serviceType: null,
+            address: null,
+            lat: null,
+            lng: null,
+            description: '',
+            photos: [],
+            providerId: null,
+            price: 0
+        };
+        
+        let availableProviders = [];
+        let savedAddresses = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check auth
+            const authed = await requireAuth('customer');
+            if (!authed) return;
+            
+            // Load saved addresses
+            await loadSavedAddresses();
+            
+            // Check for pre-selected provider from URL
+            const providerId = getUrlParam('provider');
+            if (providerId) {
+                bookingData.providerId = providerId;
+            }
+            
+            // Check for pre-selected category
+            const category = getUrlParam('category');
+            if (category) {
+                selectService(category);
+            }
+        });
+        
+        // ============================================================
+        // STEP NAVIGATION
+        // ============================================================
+        
+        function nextStep() {
+            if (!validateCurrentStep()) return;
+            
+            if (currentStep < totalSteps) {
+                // Hide current step
+                document.getElementById(`step-${currentStep}`).classList.remove('active');
+                
+                currentStep++;
+                
+                // Show next step
+                document.getElementById(`step-${currentStep}`).classList.add('active');
+                
+                // Update progress
+                updateProgress();
+                
+                // Load step-specific data
+                if (currentStep === 3) {
+                    loadProviders();
+                } else if (currentStep === 4) {
+                    updateSummary();
+                }
+                
+                // Show back button
+                document.getElementById('btn-back').classList.remove('hidden');
+                
+                // Update next button text
+                if (currentStep === totalSteps) {
+                    document.getElementById('btn-next').textContent = 'Confirm Booking';
+                }
+            } else {
+                // Submit booking
+                submitBooking();
+            }
+        }
+        
+        function prevStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step-${currentStep}`).classList.remove('active');
+                currentStep--;
+                document.getElementById(`step-${currentStep}`).classList.add('active');
+                updateProgress();
+                
+                if (currentStep === 1) {
+                    document.getElementById('btn-back').classList.add('hidden');
+                }
+                
+                document.getElementById('btn-next').textContent = 'Continue';
+            }
+        }
+        
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('step-label').textContent = `Step ${currentStep} of ${totalSteps}`;
+        }
+        
+        function validateCurrentStep() {
+            switch (currentStep) {
+                case 1:
+                    if (!bookingData.serviceType) {
+                        showToast('Please select a service type', 'error');
+                        return false;
+                    }
+                    return true;
+                case 2:
+                    if (!bookingData.address) {
+                        showToast('Please select an address', 'error');
+                        return false;
+                    }
+                    return true;
+                case 3:
+                    if (!bookingData.providerId) {
+                        showToast('Please select a plumber', 'error');
+                        return false;
+                    }
+                    return true;
+                case 4:
+                    return true;
+                default:
+                    return true;
+            }
+        }
+        
+        // ============================================================
+        // STEP 1: SERVICE SELECTION
+        // ============================================================
+        
+        function selectService(serviceType) {
+            bookingData.serviceType = serviceType;
+            
+            // Update UI
+            document.querySelectorAll('.service-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            const selected = document.querySelector(`[data-service="${serviceType}"]`);
+            if (selected) {
+                selected.classList.add('selected');
+            }
+            
+            // Update summary preview
+            const serviceNames = {
+                emergency: 'Emergency Repair',
+                repair: 'General Repair',
+                installation: 'Installation',
+                maintenance: 'Maintenance',
+                drain_cleaning: 'Drain Cleaning',
+                water_heater: 'Water Heater'
+            };
+            
+            console.log('Selected service:', serviceNames[serviceType]);
+        }
+        
+        // ============================================================
+        // STEP 2: LOCATION & DESCRIPTION
+        // ============================================================
+        
+        async function loadSavedAddresses() {
+            const supabase = getSupabase();
+            const userId = getUserId();
+            if (!supabase || !userId) return;
+            
+            try {
+                const { data: customer } = await supabase
+                    .from(DB_TABLES.CUSTOMERS)
+                    .select('home_address')
+                    .eq('id', userId)
+                    .single();
+                
+                if (customer?.home_address) {
+                    savedAddresses.push({
+                        id: 'home',
+                        label: 'Home',
+                        address: customer.home_address,
+                        isDefault: true
+                    });
+                }
+                
+                renderSavedAddresses();
+                
+            } catch (error) {
+                console.error('Error loading addresses:', error);
+            }
+        }
+        
+        function renderSavedAddresses() {
+            const container = document.getElementById('saved-addresses');
+            container.innerHTML = '';
+            
+            savedAddresses.forEach(addr => {
+                const div = document.createElement('div');
+                div.className = `address-card p-4 bg-surface-container-lowest border-2 rounded-2xl flex items-start gap-3 ${addr.isDefault ? 'border-primary/50 bg-primary/5' : 'border-outline-variant/50'}`;
+                div.onclick = () => selectAddress(addr);
+                
+                div.innerHTML = `
+                    <div class="w-10 h-10 rounded-xl ${addr.isDefault ? 'bg-primary/10' : 'bg-surface-container'} flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined ${addr.isDefault ? 'text-primary' : 'text-secondary'}">${addr.isDefault ? 'home' : 'location_on'}</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-label-md text-on-surface">${addr.label}</span>
+                            ${addr.isDefault ? '<span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full">Default</span>' : ''}
+                        </div>
+                        <p class="font-body-sm text-secondary mt-0.5">${addr.address}</p>
+                    </div>
+                    <div class="w-6 h-6 rounded-full border-2 ${addr.isDefault ? 'border-primary bg-primary' : 'border-outline-variant'} flex items-center justify-center flex-shrink-0">
+                        ${addr.isDefault ? '<span class="material-symbols-outlined text-white text-[14px]">check</span>' : ''}
+                    </div>
+                `;
+                
+                container.appendChild(div);
+            });
+        }
+        
+        function selectAddress(addr) {
+            bookingData.address = addr.address;
+            
+            // Update UI
+            document.querySelectorAll('.address-card').forEach(card => {
+                card.classList.remove('selected', 'border-primary', 'bg-primary/5');
+                card.classList.add('border-outline-variant/50');
+            });
+            
+            event.currentTarget.classList.add('selected', 'border-primary', 'bg-primary/5');
+            event.currentTarget.classList.remove('border-outline-variant/50');
+        }
+        
+        function showAddressMap() {
+            showBottomSheet('address-map-sheet');
+            
+            // Initialize map after sheet opens
+            setTimeout(() => {
+                initMap('map-container', (lat, lng, address) => {
+                    bookingData.lat = lat;
+                    bookingData.lng = lng;
+                    document.getElementById('address-input').value = address;
+                });
+            }, 300);
+        }
+        
+        function confirmAddress() {
+            const address = document.getElementById('address-input').value;
+            if (!address) {
+                showToast('Please enter an address', 'error');
+                return;
+            }
+            
+            bookingData.address = address;
+            
+            // Add to saved addresses
+            savedAddresses.push({
+                id: 'new',
+                label: 'New Address',
+                address: address,
+                isDefault: false
+            });
+            
+            renderSavedAddresses();
+            hideBottomSheet();
+            
+            // Select the new address
+            setTimeout(() => {
+                const cards = document.querySelectorAll('.address-card');
+                if (cards.length > 0) {
+                    cards[cards.length - 1].click();
+                }
+            }, 100);
+        }
+        
+        function updateBookingData(key, value) {
+            bookingData[key] = value;
+            
+            if (key === 'description') {
+                document.getElementById('desc-count').textContent = value.length;
+            }
+        }
+        
+        function handlePhotoUpload(files) {
+            const preview = document.getElementById('photo-preview');
+            
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const div = document.createElement('div');
+                    div.className = 'w-20 h-20 rounded-xl overflow-hidden relative group';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" class="w-full h-full object-cover">
+                        <button class="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity" onclick="this.parentElement.remove()">
+                            <span class="material-symbols-outlined text-[14px]">close</span>
+                        </button>
+                    `;
+                    preview.insertBefore(div, preview.lastElementChild);
+                    
+                    bookingData.photos.push(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        // ============================================================
+        // STEP 3: PROVIDER SELECTION
+        // ============================================================
+        
+        async function loadProviders() {
+            const supabase = getSupabase();
+            if (!supabase) return;
+            
+            document.getElementById('provider-loading').classList.remove('hidden');
+            document.getElementById('provider-list').classList.add('hidden');
+            
+            try {
+                // Get online providers
+                const { data: providers, error } = await supabase
+                    .from(DB_TABLES.PROVIDERS)
+                    .select(`
+                        id,
+                        is_online,
+                        rating,
+                        total_jobs,
+                        hourly_rate,
+                        current_location,
+                        profiles!inner(id, name, avatar_url)
+                    `)
+                    .eq('is_online', true)
+                    .order('rating', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                availableProviders = providers || [];
+                
+                document.getElementById('provider-loading').classList.add('hidden');
+                document.getElementById('provider-list').classList.remove('hidden');
+                
+                renderProviders();
+                
+            } catch (error) {
+                console.error('Error loading providers:', error);
+                document.getElementById('provider-loading').classList.add('hidden');
+                showToast('Failed to load providers', 'error');
+            }
+        }
+        
+        function renderProviders() {
+            const container = document.getElementById('provider-list');
+            container.innerHTML = '';
+            
+            // If pre-selected provider, show it first
+            if (bookingData.providerId) {
+                const preSelected = availableProviders.find(p => p.id === bookingData.providerId);
+                if (preSelected) {
+                    const card = createProviderCard(preSelected, true);
+                    container.appendChild(card);
+                }
+            }
+            
+            availableProviders.forEach(provider => {
+                if (provider.id === bookingData.providerId) return; // Skip pre-selected
+                const card = createProviderCard(provider, false);
+                container.appendChild(card);
+            });
+        }
+        
+        function createProviderCard(provider, isPreSelected) {
+            const div = document.createElement('div');
+            div.className = `provider-select-card p-4 bg-surface-container-lowest border-2 rounded-2xl flex gap-4 ${isPreSelected ? 'border-primary bg-primary/5 selected' : 'border-outline-variant/50'}`;
+            div.onclick = () => selectProvider(provider.id, div);
+            
+            const avatar = provider.profiles?.avatar_url || `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect fill='%23ebeef3' width='64' height='64'/><text fill='%23727787' x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='28'>?</text></svg>`;
+            const name = provider.profiles?.name || 'Unknown';
+            const rating = provider.rating || 5.0;
+            const jobs = provider.total_jobs || 0;
+            const rate = provider.hourly_rate || 45;
+            
+            div.innerHTML = `
+                <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
+                    <img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect fill=%22%23ebeef3%22 width=%2264%22 height=%2264%22/><text fill=%22%23727787%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2228%22>?</text></svg>'">
+                </div>
+                <div class="flex-1">
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-label-md text-on-surface">${name}</span>
+                        <div class="flex items-center gap-1 px-2 py-0.5 bg-tertiary/10 rounded-lg">
+                            <span class="material-symbols-outlined text-[12px] text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
+                            <span class="font-label-sm text-tertiary">${rating.toFixed(1)}</span>
+                        </div>
+                    </div>
+                    <p class="font-body-sm text-secondary mb-2">${jobs} jobs completed</p>
+                    <div class="flex items-center justify-between">
+                        <span class="font-label-sm text-secondary">$${rate}/hr</span>
+                        <div class="w-6 h-6 rounded-full border-2 ${isPreSelected ? 'border-primary bg-primary' : 'border-outline-variant'} flex items-center justify-center">
+                            ${isPreSelected ? '<span class="material-symbols-outlined text-white text-[14px]">check</span>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return div;
+        }
+        
+        function selectProvider(providerId, cardElement) {
+            bookingData.providerId = providerId;
+            
+            // Update UI
+            document.querySelectorAll('.provider-select-card').forEach(card => {
+                card.classList.remove('selected', 'border-primary', 'bg-primary/5');
+                card.classList.add('border-outline-variant/50');
+                card.querySelector('.rounded-full').className = 'w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center';
+                card.querySelector('.rounded-full').innerHTML = '';
+            });
+            
+            cardElement.classList.add('selected', 'border-primary', 'bg-primary/5');
+            cardElement.classList.remove('border-outline-variant/50');
+            cardElement.querySelector('.rounded-full').className = 'w-6 h-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center';
+            cardElement.querySelector('.rounded-full').innerHTML = '<span class="material-symbols-outlined text-white text-[14px]">check</span>';
+        }
+        
+        // ============================================================
+        // STEP 4: SUMMARY
+        // ============================================================
+        
+        function updateSummary() {
+            // Service info
+            const serviceNames = {
+                emergency: 'Emergency Repair',
+                repair: 'General Repair',
+                installation: 'Installation',
+                maintenance: 'Maintenance',
+                drain_cleaning: 'Drain Cleaning',
+                water_heater: 'Water Heater'
+            };
+            
+            const serviceIcons = {
+                emergency: 'emergency',
+                repair: 'build',
+                installation: 'plumbing',
+                maintenance: 'construction',
+                drain_cleaning: 'cleaning_services',
+                water_heater: 'water_heater'
+            };
+            
+            document.getElementById('summary-service').textContent = serviceNames[bookingData.serviceType] || 'Plumbing Service';
+            document.getElementById('summary-icon').innerHTML = `<span class="material-symbols-outlined text-primary text-[24px]">${serviceIcons[bookingData.serviceType] || 'plumbing'}</span>`;
+            
+            // Address
+            document.getElementById('summary-address').textContent = bookingData.address || 'Not specified';
+            
+            // Description
+            document.getElementById('summary-description').textContent = bookingData.description || 'No description provided';
+            
+            // Provider
+            const provider = availableProviders.find(p => p.id === bookingData.providerId);
+            document.getElementById('summary-provider').textContent = provider?.profiles?.name || 'Auto-assigned';
+            
+            // Price calculation
+            const baseFee = 45;
+            const hourlyRate = provider?.hourly_rate || 45;
+            const estimatedHours = 2;
+            const laborCost = hourlyRate * estimatedHours;
+            const platformFee = 5;
+            const total = baseFee + laborCost + platformFee;
+            
+            bookingData.price = total;
+            
+            document.getElementById('price-base').textContent = formatCurrency(baseFee);
+            document.getElementById('price-labor').textContent = formatCurrency(laborCost);
+            document.getElementById('price-platform').textContent = formatCurrency(platformFee);
+            document.getElementById('price-total').textContent = formatCurrency(total);
+        }
+        
+        // ============================================================
+        // SUBMIT BOOKING
+        // ============================================================
+        
+        async function submitBooking() {
+            const supabase = getSupabase();
+            const userId = getUserId();
+            if (!supabase || !userId) return;
+            
+            document.getElementById('booking-overlay').classList.remove('hidden');
+            
+            try {
+                // Get customer ID
+                const { data: customer } = await supabase
+                    .from(DB_TABLES.CUSTOMERS)
+                    .select('id')
+                    .eq('id', userId)
+                    .single();
+                
+                // Create booking
+                const { data: booking, error } = await supabase
+                    .from(DB_TABLES.BOOKINGS)
+                    .insert({
+                        customer_id: userId,
+                        provider_id: bookingData.providerId,
+                        service_type: bookingData.serviceType,
+                        description: bookingData.description,
+                        address: bookingData.address,
+                        location: bookingData.lat && bookingData.lng ? `POINT(${bookingData.lng} ${bookingData.lat})` : null,
+                        status: 'pending',
+                        price: bookingData.price,
+                        created_at: new Date().toISOString()
+                    })
+                    .select()
+                    .single();
+                
+                if (error) throw error;
+                
+                // Hide loading, show success
+                document.getElementById('booking-overlay').classList.add('hidden');
+                document.getElementById('success-modal').classList.remove('hidden');
+                
+                // Store booking ID for tracking
+                localStorage.setItem('lastBookingId', booking.id);
+                
+            } catch (error) {
+                console.error('Booking error:', error);
+                document.getElementById('booking-overlay').classList.add('hidden');
+                showToast('Failed to create booking. Please try again.', 'error');
+            }
+        }
+        
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        
+        function goToTracking() {
+            const bookingId = localStorage.getItem('lastBookingId');
+            if (bookingId) {
+                window.location.href = `tracking.html?booking=${bookingId}`;
+            } else {
+                window.location.href = 'tracking.html';
+            }
+        }
+        
+        function goToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+        
+        // ============================================================
+        // GLOBAL EXPORTS
+        // ============================================================
+        
+        window.selectService = selectService;
+        window.selectAddress = selectAddress;
+        window.selectProvider = selectProvider;
+        window.showAddressMap = showAddressMap;
+        window.confirmAddress = confirmAddress;
+        window.nextStep = nextStep;
+        window.prevStep = prevStep;
+        window.goToTracking = goToTracking;
+        window.goToDashboard = goToDashboard;
+    </script>
+</body>
+</html>
+<!-- '''
+
+# Write to file
+with open('/mnt/agents/output/customer_booking.html', 'w') as f:
+    f.write(booking_html)
+
+print("✅ customer/booking.html created successfully!")
+print(f"📄 File size: {len(booking_html)} characters")
+print("\n📋 Features included:")
+print("  • 4-Step Booking Flow (with progress bar)")
+print("  • Step 1: Service Type Selection (6 options)")
+print("  • Step 2: Location + Description + Photo Upload")
+print("  • Step 3: Provider Selection (from Supabase)")
+print("  • Step 4: Review & Confirm with Price Breakdown")
+print("  • Saved Addresses")
+print("  • Map Integration (for new address)")
+print("  • Photo Upload Preview")
+print("  • Real-time Price Calculation")
+print("  • Success Modal with Tracking Link")
+print("  • Form Validation per Step")
+print("  • Responsive Design") -->
