@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        body {
-            font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-        }
-    </style>
-<script id="tailwind-config">
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <meta name="theme-color" content="#0057cd"/>
+    <title>My Profile | Plumbly</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
-                    "colors": {
+                    colors: {
                         "secondary": "#5c5f60",
                         "error": "#ba1a1a",
                         "secondary-fixed": "#e1e3e4",
@@ -70,13 +70,15 @@
                         "surface": "#f7f9ff",
                         "on-error": "#ffffff"
                     },
-                    "borderRadius": {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        full: "9999px"
                     },
-                    "spacing": {
+                    spacing: {
                         "stack-sm": "8px",
                         "section-padding": "32px",
                         "stack-lg": "24px",
@@ -85,155 +87,1039 @@
                         "stack-md": "16px",
                         "unit": "4px"
                     },
-                    "fontFamily": {
+                    fontFamily: {
                         "h3": ["Inter"],
+                        "body-md": ["Inter"],
+                        "label-sm": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "h1": ["Inter"],
                         "label-md": ["Inter"],
                         "h2": ["Inter"],
-                        "body-md": ["Inter"],
-                        "body-lg": ["Inter"],
-                        "body-sm": ["Inter"],
-                        "label-sm": ["Inter"],
-                        "h1": ["Inter"]
+                        "body-sm": ["Inter"]
                     },
-                    "fontSize": {
+                    fontSize: {
                         "h3": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
                         "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}],
                         "h2": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
-                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
-                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
-                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
-                        "label-sm": ["12px", {"lineHeight": "14px", "fontWeight": "500"}],
-                        "h1": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
                     }
-                },
-            },
+                }
+            }
         }
     </script>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
-<body class="bg-background text-on-surface min-h-screen pb-24">
-<!-- TopAppBar -->
-<header class="flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-40 backdrop-blur-md bg-surface/80 dark:bg-surface-dim/80">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined text-primary dark:text-primary-fixed" data-icon="location_on">location_on</span>
-<span class="font-h2 text-h2 font-bold text-primary dark:text-primary-fixed">Plumbly</span>
-</div>
-<div class="w-10 h-10 rounded-full overflow-hidden border border-outline-variant">
-<img alt="User profile avatar" class="w-full h-full object-cover" data-alt="A professional studio portrait of a friendly man in his early 30s with a neat beard, set against a soft, neutral grey background. The lighting is bright and even, reflecting a clean light-mode UI aesthetic. The composition is focused and high-quality, conveying a sense of trust and premium service identity common in modern tech applications." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcJ911OxNI7F4YrXaZ0eBJoO2Rw-onlMlcK6ap7-NzbS5v_jPpdWAn07-V9oZgPK-GnbM3VOUkenerqOaarspa-2qsolYspX04VmMlJOk2ux1mGvf4HEhIEEoAjoKYnjTatXdlyJTW4O06RGsny_9RjnNLTuWlqAzWEonAnpNOhtJaPHuCIEKQjJ2b5TuVTPrlUkAfbgqgU4cMaycjOoyXkpn04FzIvsWTdfHMTl0CLdI8KHIIUiHVXbtowf_p-HJGtmpAq6izpmt1"/>
-</div>
-</header>
-<main class="px-margin-mobile pt-stack-lg max-w-2xl mx-auto">
-<!-- Profile Hero Section -->
-<section class="flex flex-col items-center mb-stack-lg">
-<div class="relative mb-stack-md">
-<div class="w-24 h-24 rounded-full p-1 bg-gradient-to-tr from-primary to-primary-container shadow-lg">
-<img alt="Alex Johnson" class="w-full h-full object-cover rounded-full border-2 border-surface" data-alt="A close-up, high-resolution portrait of a smiling professional man with short dark hair and a groomed beard. He is wearing a simple, high-quality white t-shirt. The background is a minimalist, brightly lit studio setting with soft shadows, perfectly matching the premium minimalist aesthetic of a high-end service platform. The mood is welcoming and reliable." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC0qHn6Se9JsrQUaVDHUcn63meVpbukP0AKgWNHrAYqu7eTubi02vMWcCofQmgp-7F08tUvDh9Pz4f5-01RZINRnRHrsmCqYwmr1IdBdLegoIPlD6QfJMC7H30IrifX19nqCee2fhUV3ggb7uZaPN8HugKGUzYIpFFfwAEWDrznKPNiBIitNDbdkZx_7gx94zn6n-cQN49QeMSKw-HyrdlLM-561sk7IP9Ia23SdjQBTBqDMj-OfDPbc2X-DOXflXugAySUGUmRZFFK"/>
-</div>
-<div class="absolute bottom-0 right-0 bg-[#20c997] text-white p-1 rounded-full border-2 border-surface flex items-center justify-center">
-<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-</div>
-</div>
-<div class="text-center">
-<h1 class="font-h2 text-h2 text-on-surface">Alex Johnson</h1>
-<p class="font-body-sm text-body-sm text-secondary">Verified Premium Member • 4.9 Rating</p>
-</div>
-</section>
-<!-- Stats Bento Grid (Visual Interest) -->
-<div class="grid grid-cols-2 gap-gutter-grid mb-stack-lg">
-<div class="bg-surface-container-low p-stack-md rounded-xl border border-outline-variant/30">
-<p class="font-label-sm text-label-sm text-secondary mb-1">Total Savings</p>
-<p class="font-h3 text-h3 text-primary">$124.50</p>
-</div>
-<div class="bg-surface-container-low p-stack-md rounded-xl border border-outline-variant/30">
-<p class="font-label-sm text-label-sm text-secondary mb-1">Member Since</p>
-<p class="font-h3 text-h3 text-on-surface">Oct 2023</p>
-</div>
-</div>
-<!-- Menu List -->
-<div class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-<!-- Past Bookings -->
-<button class="w-full flex items-center justify-between p-stack-md hover:bg-surface-container-high transition-colors active:scale-[0.98] duration-150 border-b border-outline-variant/10">
-<div class="flex items-center gap-4">
-<div class="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary">
-<span class="material-symbols-outlined" data-icon="history">history</span>
-</div>
-<div class="text-left">
-<p class="font-body-md text-body-md font-semibold text-on-surface">Past Bookings</p>
-<p class="font-label-sm text-label-sm text-secondary">View your service history</p>
-</div>
-</div>
-<span class="material-symbols-outlined text-secondary opacity-50">chevron_right</span>
-</button>
-<!-- Saved Addresses -->
-<button class="w-full flex items-center justify-between p-stack-md hover:bg-surface-container-high transition-colors active:scale-[0.98] duration-150 border-b border-outline-variant/10">
-<div class="flex items-center gap-4">
-<div class="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary">
-<span class="material-symbols-outlined" data-icon="home_pin">home_pin</span>
-</div>
-<div class="text-left">
-<p class="font-body-md text-body-md font-semibold text-on-surface">Saved Addresses</p>
-<p class="font-label-sm text-label-sm text-secondary">Manage your locations</p>
-</div>
-</div>
-<span class="material-symbols-outlined text-secondary opacity-50">chevron_right</span>
-</button>
-<!-- Payment Methods -->
-<button class="w-full flex items-center justify-between p-stack-md hover:bg-surface-container-high transition-colors active:scale-[0.98] duration-150 border-b border-outline-variant/10">
-<div class="flex items-center gap-4">
-<div class="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary">
-<span class="material-symbols-outlined" data-icon="credit_card">credit_card</span>
-</div>
-<div class="text-left">
-<p class="font-body-md text-body-md font-semibold text-on-surface">Payment Methods</p>
-<p class="font-label-sm text-label-sm text-secondary">Cards, Wallet &amp; Credits</p>
-</div>
-</div>
-<span class="material-symbols-outlined text-secondary opacity-50">chevron_right</span>
-</button>
-<!-- Settings -->
-<button class="w-full flex items-center justify-between p-stack-md hover:bg-surface-container-high transition-colors active:scale-[0.98] duration-150">
-<div class="flex items-center gap-4">
-<div class="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary">
-<span class="material-symbols-outlined" data-icon="settings">settings</span>
-</div>
-<div class="text-left">
-<p class="font-body-md text-body-md font-semibold text-on-surface">Settings</p>
-<p class="font-label-sm text-label-sm text-secondary">Preferences &amp; Security</p>
-</div>
-</div>
-<span class="material-symbols-outlined text-secondary opacity-50">chevron_right</span>
-</button>
-</div>
-<!-- Log Out Button -->
-<div class="mt-stack-lg">
-<button class="w-full flex items-center justify-center gap-2 py-4 px-6 rounded-xl border border-error/20 text-error font-body-md font-semibold bg-error/5 hover:bg-error/10 active:scale-[0.98] transition-all">
-<span class="material-symbols-outlined" data-icon="logout">logout</span>
-                Log out
+    
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        .material-symbols-outlined.filled { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100dvh;
+            background: #f7f9ff;
+        }
+        
+        /* Animations */
+        .page-enter { opacity: 0; transform: translateY(20px); }
+        .page-enter-active { opacity: 1; transform: translateY(0); transition: all 0.5s cubic-bezier(0.33, 1, 0.68, 1); }
+        
+        .slide-up { opacity: 0; transform: translateY(16px); }
+        .slide-up-visible { opacity: 1; transform: translateY(0); transition: all 0.4s ease-out; }
+        
+        .scale-in { opacity: 0; transform: scale(0.9); }
+        .scale-in-visible { opacity: 1; transform: scale(1); transition: all 0.3s cubic-bezier(0.33, 1, 0.68, 1); }
+        
+        /* Avatar upload */
+        .avatar-overlay {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .avatar-container:hover .avatar-overlay { opacity: 1; }
+        
+        /* Card hover */
+        .card-hover {
+            transition: all 0.2s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,87,205,0.12);
+        }
+        
+        /* Tab indicator */
+        .tab-indicator { transition: transform 0.3s cubic-bezier(0.33, 1, 0.68, 1); }
+        
+        /* Input focus */
+        .input-animated {
+            transition: all 0.3s ease;
+        }
+        .input-animated:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,87,205,0.15);
+        }
+        
+        /* Button ripple */
+        .btn-ripple {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-ripple::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.5s, opacity 0.3s;
+        }
+        .btn-ripple:active::after {
+            transform: scale(2);
+            opacity: 1;
+            transition: 0s;
+        }
+        
+        /* Toast */
+        .toast-enter { transform: translateY(100px); opacity: 0; }
+        .toast-visible { transform: translateY(0); opacity: 1; transition: all 0.4s cubic-bezier(0.33, 1, 0.68, 1); }
+        
+        /* Hide scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Bottom nav active indicator */
+        .nav-item.active { color: #0057cd; }
+        .nav-item.active .nav-icon { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        
+        /* Skeleton loading */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #ebeef3 25%, #f1f4f9 50%, #ebeef3 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col relative overflow-x-hidden">
+    
+    <!-- Auth Error Banner -->
+    <div id="auth-error" class="hidden fixed top-0 left-0 right-0 bg-error text-white p-4 z-[100]">
+        <div class="flex items-center justify-center gap-2 max-w-md mx-auto">
+            <span class="material-symbols-outlined">error</span>
+            <span id="auth-error-text" class="font-body-md text-sm">Error message</span>
+        </div>
+    </div>
+    
+    <!-- Auth Success Banner -->
+    <div id="auth-success" class="hidden fixed top-0 left-0 right-0 bg-[#20c997] text-white p-4 z-[100]">
+        <div class="flex items-center justify-center gap-2 max-w-md mx-auto">
+            <span class="material-symbols-outlined">check_circle</span>
+            <span id="auth-success-text" class="font-body-md text-sm">Success message</span>
+        </div>
+    </div>
+    
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-surface/90 backdrop-blur-md border-b border-outline-variant/30">
+        <div class="max-w-lg mx-auto px-margin-mobile h-14 flex items-center justify-between">
+            <button onclick="history.back()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+                <span class="material-symbols-outlined text-on-surface">arrow_back</span>
             </button>
-<p class="text-center mt-stack-md font-label-sm text-label-sm text-secondary opacity-60">Version 2.4.1 (Build 890)</p>
-</div>
-</main>
-<!-- BottomNavBar -->
-<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile py-stack-sm pb-safe bg-surface dark:bg-surface-dim shadow-lg dark:shadow-none border-t border-outline-variant dark:border-outline rounded-t-xl">
-<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed hover:text-primary transition-all active:scale-90 duration-200" href="#">
-<span class="material-symbols-outlined" data-icon="home">home</span>
-<span class="font-label-sm text-label-sm">Home</span>
-</a>
-<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed hover:text-primary transition-all active:scale-90 duration-200" href="#">
-<span class="material-symbols-outlined" data-icon="plumbing">plumbing</span>
-<span class="font-label-sm text-label-sm">Bookings</span>
-</a>
-<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed hover:text-primary transition-all active:scale-90 duration-200" href="#">
-<span class="material-symbols-outlined" data-icon="chat_bubble">chat_bubble</span>
-<span class="font-label-sm text-label-sm">Messages</span>
-</a>
-<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed font-semibold bg-primary-container/10 rounded-xl px-3 py-1 active:scale-90 duration-200" href="#">
-<span class="material-symbols-outlined" data-icon="person" style="font-variation-settings: 'FILL' 1;">person</span>
-<span class="font-label-sm text-label-sm">Profile</span>
-</a>
-</nav>
-</body></html>
+            <h1 class="font-h3 text-h3 text-on-surface">My Profile</h1>
+            <button onclick="openSettings()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+                <span class="material-symbols-outlined text-on-surface">settings</span>
+            </button>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="flex-1 max-w-lg mx-auto w-full px-margin-mobile py-stack-lg pb-24">
+        
+        <!-- Profile Header Card -->
+        <div id="profile-header" class="bg-surface-container-lowest rounded-3xl p-6 mb-stack-lg card-hover scale-in">
+            <div class="flex flex-col items-center">
+                <!-- Avatar -->
+                <div class="avatar-container relative mb-4">
+                    <div class="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden border-4 border-surface shadow-lg">
+                        <img id="profile-avatar" src="" alt="Profile" class="w-full h-full object-cover hidden"/>
+                        <span id="profile-initials" class="font-h1 text-h1 text-primary">JD</span>
+                    </div>
+                    <label class="avatar-overlay absolute inset-0 bg-black/40 rounded-full flex items-center justify-center cursor-pointer">
+                        <span class="material-symbols-outlined text-white text-2xl">camera_alt</span>
+                        <input type="file" id="avatar-input" accept="image/*" class="hidden" onchange="handleAvatarUpload(this)"/>
+                    </label>
+                </div>
+                
+                <!-- Name & Email -->
+                <h2 id="profile-name" class="font-h2 text-h2 text-on-surface mb-1">John Doe</h2>
+                <p id="profile-email" class="font-body-sm text-secondary mb-2">john@example.com</p>
+                
+                <!-- Role Badge -->
+                <span id="profile-role" class="px-3 py-1 bg-primary/10 text-primary font-label-md text-label-sm rounded-full">
+                    Customer
+                </span>
+            </div>
+            
+            <!-- Quick Stats -->
+            <div class="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-outline-variant/30">
+                <div class="text-center">
+                    <p id="stat-bookings" class="font-h3 text-h3 text-primary">12</p>
+                    <p class="font-label-sm text-secondary mt-1">Bookings</p>
+                </div>
+                <div class="text-center border-x border-outline-variant/30">
+                    <p id="stat-completed" class="font-h3 text-h3 text-[#20c997]">8</p>
+                    <p class="font-label-sm text-secondary mt-1">Completed</p>
+                </div>
+                <div class="text-center">
+                    <p id="stat-reviews" class="font-h3 text-h3 text-tertiary">4.5</p>
+                    <p class="font-label-sm text-secondary mt-1">Rating</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Profile Tabs -->
+        <div class="bg-surface-container-low rounded-2xl p-1 mb-stack-lg">
+            <div class="flex relative">
+                <div id="tab-indicator" class="tab-indicator absolute top-1 bottom-1 w-1/3 bg-surface rounded-xl shadow-sm"></div>
+                <button id="tab-info" class="flex-1 py-3 rounded-xl font-label-md text-label-md relative z-10 transition-colors text-on-surface" onclick="switchTab('info')">
+                    Info
+                </button>
+                <button id="tab-addresses" class="flex-1 py-3 rounded-xl font-label-md text-label-md relative z-10 transition-colors text-secondary" onclick="switchTab('addresses')">
+                    Addresses
+                </button>
+                <button id="tab-security" class="flex-1 py-3 rounded-xl font-label-md text-label-md relative z-10 transition-colors text-secondary" onclick="switchTab('security')">
+                    Security
+                </button>
+            </div>
+        </div>
+        
+        <!-- Tab: Personal Info -->
+        <div id="tab-content-info" class="space-y-stack-md">
+            <!-- Personal Info Form -->
+            <div class="bg-surface-container-lowest rounded-3xl p-6 card-hover slide-up">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-h3 text-h3 text-on-surface">Personal Information</h3>
+                    <button id="edit-info-btn" onclick="toggleEditMode('info')" class="text-primary font-label-md text-label-sm hover:text-primary/80 transition-colors">
+                        Edit
+                    </button>
+                </div>
+                
+                <form id="info-form" class="space-y-stack-md">
+                    <!-- Full Name -->
+                    <div>
+                        <label class="block font-label-sm text-secondary mb-1 ml-1">Full Name</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">person</span>
+                            </div>
+                            <input type="text" id="info-name" name="full_name" disabled
+                                class="w-full h-14 pl-12 pr-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated disabled:opacity-60 disabled:cursor-not-allowed"
+                                placeholder="Your full name"/>
+                        </div>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div>
+                        <label class="block font-label-sm text-secondary mb-1 ml-1">Email</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">mail</span>
+                            </div>
+                            <input type="email" id="info-email" name="email" disabled
+                                class="w-full h-14 pl-12 pr-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated disabled:opacity-60 disabled:cursor-not-allowed"
+                                placeholder="your@email.com"/>
+                        </div>
+                    </div>
+                    
+                    <!-- Phone -->
+                    <div>
+                        <label class="block font-label-sm text-secondary mb-1 ml-1">Phone</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">phone</span>
+                            </div>
+                            <input type="tel" id="info-phone" name="phone" disabled
+                                class="w-full h-14 pl-12 pr-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated disabled:opacity-60 disabled:cursor-not-allowed"
+                                placeholder="+1 234 567 8900"/>
+                        </div>
+                    </div>
+                    
+                    <!-- Save Button (hidden by default) -->
+                    <button type="submit" id="info-save-btn" class="hidden w-full h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl shadow-lg shadow-primary/30 btn-ripple active:scale-[0.98] transition-transform">
+                        Save Changes
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Bio -->
+            <div class="bg-surface-container-lowest rounded-3xl p-6 card-hover slide-up">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-h3 text-h3 text-on-surface">About Me</h3>
+                    <button id="edit-bio-btn" onclick="toggleEditMode('bio')" class="text-primary font-label-md text-label-sm hover:text-primary/80 transition-colors">
+                        Edit
+                    </button>
+                </div>
+                <textarea id="info-bio" name="bio" disabled rows="4"
+                    class="w-full p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated disabled:opacity-60 disabled:cursor-not-allowed resize-none"
+                    placeholder="Tell us about yourself..."></textarea>
+                <button type="button" id="bio-save-btn" onclick="saveBio()" class="hidden w-full h-14 mt-4 bg-primary text-on-primary font-h3 text-h3 rounded-2xl shadow-lg shadow-primary/30 btn-ripple active:scale-[0.98] transition-transform">
+                    Save Bio
+                </button>
+            </div>
+        </div>
+        
+        <!-- Tab: Addresses -->
+        <div id="tab-content-addresses" class="space-y-stack-md hidden">
+            <!-- Add New Address Button -->
+            <button onclick="openAddressModal()" class="w-full h-14 border-2 border-dashed border-primary/30 rounded-2xl flex items-center justify-center gap-2 text-primary font-label-md hover:bg-primary/5 transition-colors">
+                <span class="material-symbols-outlined">add_location</span>
+                Add New Address
+            </button>
+            
+            <!-- Address List -->
+            <div id="address-list" class="space-y-stack-md">
+                <!-- Address Card 1 -->
+                <div class="bg-surface-container-lowest rounded-3xl p-5 card-hover slide-up relative group">
+                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="editAddress(1)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors mr-1">
+                            <span class="material-symbols-outlined text-secondary text-[18px]">edit</span>
+                        </button>
+                        <button onclick="deleteAddress(1)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-error/10 transition-colors">
+                            <span class="material-symbols-outlined text-error text-[18px]">delete</span>
+                        </button>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-primary">home</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="font-label-md text-label-md text-on-surface">Home</h4>
+                                <span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-semibold rounded-full">Default</span>
+                            </div>
+                            <p class="font-body-sm text-secondary">123 Main Street, Apt 4B</p>
+                            <p class="font-body-sm text-secondary">New York, NY 10001</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Address Card 2 -->
+                <div class="bg-surface-container-lowest rounded-3xl p-5 card-hover slide-up relative group">
+                    <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="editAddress(2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors mr-1">
+                            <span class="material-symbols-outlined text-secondary text-[18px]">edit</span>
+                        </button>
+                        <button onclick="deleteAddress(2)" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-error/10 transition-colors">
+                            <span class="material-symbols-outlined text-error text-[18px]">delete</span>
+                        </button>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-10 h-10 bg-tertiary/10 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-tertiary">work</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-label-md text-label-md text-on-surface mb-1">Office</h4>
+                            <p class="font-body-sm text-secondary">456 Business Ave, Floor 12</p>
+                            <p class="font-body-sm text-secondary">New York, NY 10002</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tab: Security -->
+        <div id="tab-content-security" class="space-y-stack-md hidden">
+            <!-- Change Password -->
+            <div class="bg-surface-container-lowest rounded-3xl p-6 card-hover slide-up">
+                <h3 class="font-h3 text-h3 text-on-surface mb-4">Change Password</h3>
+                <form id="password-form" class="space-y-stack-md" onsubmit="changePassword(event)">
+                    <div>
+                        <label class="block font-label-sm text-secondary mb-1 ml-1">Current Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">lock</span>
+                            </div>
+                            <input type="password" id="current-password" required
+                                class="w-full h-14 pl-12 pr-12 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated"
+                                placeholder="Enter current password"/>
+                            <button type="button" class="absolute inset-y-0 right-4 flex items-center text-secondary hover:text-on-surface transition-colors" onclick="togglePassword('current-password', this)">
+                                <span class="material-symbols-outlined text-[20px]">visibility_off</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block font-label-sm text-secondary mb-1 ml-1">New Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">lock_outline</span>
+                            </div>
+                            <input type="password" id="new-password" required oninput="checkPasswordStrength(this.value)"
+                                class="w-full h-14 pl-12 pr-12 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated"
+                                placeholder="Min 6 characters"/>
+                            <button type="button" class="absolute inset-y-0 right-4 flex items-center text-secondary hover:text-on-surface transition-colors" onclick="togglePassword('new-password', this)">
+                                <span class="material-symbols-outlined text-[20px]">visibility_off</span>
+                            </button>
+                        </div>
+                        <!-- Password Strength -->
+                        <div class="flex gap-1 mt-2">
+                            <div class="h-1 flex-1 bg-surface-container-high rounded-full" id="strength-1"></div>
+                            <div class="h-1 flex-1 bg-surface-container-high rounded-full" id="strength-2"></div>
+                            <div class="h-1 flex-1 bg-surface-container-high rounded-full" id="strength-3"></div>
+                            <div class="h-1 flex-1 bg-surface-container-high rounded-full" id="strength-4"></div>
+                        </div>
+                        <p class="font-label-sm text-secondary mt-1" id="strength-text">Enter password</p>
+                    </div>
+                    
+                    <div>
+                        <label class="block font-label-sm text-secondary mb-1 ml-1">Confirm New Password</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                                <span class="material-symbols-outlined text-secondary text-[20px]">lock_outline</span>
+                            </div>
+                            <input type="password" id="confirm-password" required
+                                class="w-full h-14 pl-12 pr-12 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated"
+                                placeholder="Confirm new password"/>
+                            <button type="button" class="absolute inset-y-0 right-4 flex items-center text-secondary hover:text-on-surface transition-colors" onclick="togglePassword('confirm-password', this)">
+                                <span class="material-symbols-outlined text-[20px]">visibility_off</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="w-full h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl shadow-lg shadow-primary/30 btn-ripple active:scale-[0.98] transition-transform">
+                        Update Password
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Danger Zone -->
+            <div class="bg-error-container/30 rounded-3xl p-6 border border-error/20">
+                <h3 class="font-h3 text-h3 text-error mb-2">Danger Zone</h3>
+                <p class="font-body-sm text-secondary mb-4">Once you delete your account, there is no going back.</p>
+                <button onclick="confirmDeleteAccount()" class="w-full h-12 border-2 border-error text-error font-label-md rounded-2xl hover:bg-error hover:text-white transition-all">
+                    Delete Account
+                </button>
+            </div>
+        </div>
+        
+    </main>
+    
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-surface/95 backdrop-blur-md border-t border-outline-variant/30 z-50">
+        <div class="max-w-lg mx-auto px-6 h-16 flex items-center justify-around">
+            <a href="index.html" class="nav-item flex flex-col items-center gap-1 text-secondary hover:text-primary transition-colors">
+                <span class="material-symbols-outlined nav-icon text-[24px]">home</span>
+                <span class="font-label-sm text-[10px]">Home</span>
+            </a>
+            <a href="customer/bookings.html" class="nav-item flex flex-col items-center gap-1 text-secondary hover:text-primary transition-colors">
+                <span class="material-symbols-outlined nav-icon text-[24px]">calendar_month</span>
+                <span class="font-label-sm text-[10px]">Bookings</span>
+            </a>
+            <a href="customer/tracking.html" class="nav-item flex flex-col items-center gap-1 text-secondary hover:text-primary transition-colors">
+                <span class="material-symbols-outlined nav-icon text-[24px]">location_on</span>
+                <span class="font-label-sm text-[10px]">Track</span>
+            </a>
+            <a href="customer/profile.html" class="nav-item active flex flex-col items-center gap-1 text-primary transition-colors">
+                <span class="material-symbols-outlined nav-icon filled text-[24px]">person</span>
+                <span class="font-label-sm text-[10px]">Profile</span>
+            </a>
+        </div>
+    </nav>
+    
+    <!-- Address Modal -->
+    <div id="address-modal" class="hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-end justify-center">
+        <div class="bg-surface-container-lowest w-full max-w-lg rounded-t-3xl p-6 animate-slide-up">
+            <div class="flex items-center justify-between mb-6">
+                <h3 id="modal-title" class="font-h2 text-h2 text-on-surface">Add Address</h3>
+                <button onclick="closeAddressModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors">
+                    <span class="material-symbols-outlined text-on-surface">close</span>
+                </button>
+            </div>
+            
+            <form id="address-form" class="space-y-stack-md" onsubmit="saveAddress(event)">
+                <input type="hidden" id="address-id"/>
+                
+                <div>
+                    <label class="block font-label-sm text-secondary mb-1 ml-1">Label</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="address-label" value="Home" class="peer hidden" checked>
+                            <div class="py-3 rounded-xl border-2 border-outline-variant/50 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                <span class="material-symbols-outlined text-primary text-[20px]">home</span>
+                                <p class="font-label-sm text-xs mt-1">Home</p>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="address-label" value="Office" class="peer hidden">
+                            <div class="py-3 rounded-xl border-2 border-outline-variant/50 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                <span class="material-symbols-outlined text-primary text-[20px]">work</span>
+                                <p class="font-label-sm text-xs mt-1">Office</p>
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="address-label" value="Other" class="peer hidden">
+                            <div class="py-3 rounded-xl border-2 border-outline-variant/50 text-center peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+                                <span class="material-symbols-outlined text-primary text-[20px]">location_on</span>
+                                <p class="font-label-sm text-xs mt-1">Other</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block font-label-sm text-secondary mb-1 ml-1">Street Address</label>
+                    <input type="text" id="address-street" required
+                        class="w-full h-14 px-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated"
+                        placeholder="123 Main Street"/>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-label-sm text-secondary mb-1 ml-1">City</label>
+                        <input type="text" id="address-city" required
+                            class="w-full h-14 px-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated"
+                            placeholder="New York"/>
+                    </div>
+                    <div>
+                        <label class="block font-label-sm text-secondary mb-1 ml-1">ZIP Code</label>
+                        <input type="text" id="address-zip" required
+                            class="w-full h-14 px-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface focus:border-primary focus:ring-0 focus:outline-none input-animated"
+                            placeholder="10001"/>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2 py-2">
+                    <input type="checkbox" id="address-default" class="w-5 h-5 rounded-lg border-2 border-outline-variant text-primary focus:ring-primary"/>
+                    <label for="address-default" class="font-body-sm text-on-surface">Set as default address</label>
+                </div>
+                
+                <button type="submit" class="w-full h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl shadow-lg shadow-primary/30 btn-ripple active:scale-[0.98] transition-transform">
+                    Save Address
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Account Modal -->
+    <div id="delete-modal" class="hidden fixed inset-0 z-[60] bg-black/50 backdrop-blur-sm flex items-center justify-center p-6">
+        <div class="bg-surface-container-lowest w-full max-w-sm rounded-3xl p-6 text-center">
+            <div class="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span class="material-symbols-outlined text-error text-[32px]">warning</span>
+            </div>
+            <h3 class="font-h2 text-h2 text-on-surface mb-2">Delete Account?</h3>
+            <p class="font-body-sm text-secondary mb-6">This action cannot be undone. All your data will be permanently removed.</p>
+            <div class="space-y-3">
+                <button onclick="deleteAccount()" class="w-full h-12 bg-error text-white font-label-md rounded-2xl hover:bg-error/90 transition-colors">
+                    Yes, Delete My Account
+                </button>
+                <button onclick="closeDeleteModal()" class="w-full h-12 border-2 border-outline-variant text-on-surface font-label-md rounded-2xl hover:bg-surface-container transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="page-loading" class="hidden fixed inset-0 z-[80] bg-surface/90 backdrop-blur-sm flex flex-col items-center justify-center">
+        <div class="relative">
+            <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <span class="material-symbols-outlined text-primary text-2xl">water_drop</span>
+            </div>
+        </div>
+        <p class="mt-4 font-body-md text-secondary animate-pulse">Loading...</p>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="../supabase-config.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/auth.js"></script>
+    
+    <script>
+        // ============================================================
+        // PROFILE PAGE LOGIC
+        // ============================================================
+        
+        let currentTab = 'info';
+        let editModes = { info: false, bio: false };
+        let userProfile = null;
+        
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Animate elements
+            setTimeout(() => {
+                document.querySelectorAll('.scale-in').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('scale-in-visible'), i * 100);
+                });
+                document.querySelectorAll('.slide-up').forEach((el, i) => {
+                    setTimeout(() => el.classList.add('slide-up-visible'), 200 + i * 80);
+                });
+            }, 100);
+            
+            // Load profile data
+            await loadProfile();
+        });
+        
+        // ============================================================
+        // LOAD PROFILE DATA
+        // ============================================================
+        
+        async function loadProfile() {
+            showLoading(true);
+            
+            try {
+                const user = await getCurrentUser();
+                if (!user) {
+                    window.location.href = '../login.html';
+                    return;
+                }
+                
+                // Get profile from database
+                const profile = await getUserProfile(user.id);
+                userProfile = profile || {};
+                
+                // Update UI
+                updateProfileUI(user, profile);
+                
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                showAuthError('Failed to load profile');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function updateProfileUI(user, profile) {
+            // Avatar & Name
+            const name = profile?.full_name || user.user_metadata?.full_name || 'User';
+            const email = user.email;
+            const avatar = profile?.avatar_url || user.user_metadata?.avatar_url;
+            const role = profile?.role || 'customer';
+            
+            document.getElementById('profile-name').textContent = name;
+            document.getElementById('profile-email').textContent = email;
+            document.getElementById('profile-role').textContent = role.charAt(0).toUpperCase() + role.slice(1);
+            
+            // Avatar
+            if (avatar) {
+                document.getElementById('profile-avatar').src = avatar;
+                document.getElementById('profile-avatar').classList.remove('hidden');
+                document.getElementById('profile-initials').classList.add('hidden');
+            } else {
+                const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+                document.getElementById('profile-initials').textContent = initials;
+            }
+            
+            // Form fields
+            document.getElementById('info-name').value = name;
+            document.getElementById('info-email').value = email;
+            document.getElementById('info-phone').value = profile?.phone || '';
+            document.getElementById('info-bio').value = profile?.bio || '';
+            
+            // Stats (mock data - replace with real queries)
+            document.getElementById('stat-bookings').textContent = profile?.total_bookings || '0';
+            document.getElementById('stat-completed').textContent = profile?.completed_bookings || '0';
+            document.getElementById('stat-reviews').textContent = profile?.rating || '0.0';
+        }
+        
+        // ============================================================
+        // TAB SWITCHING
+        // ============================================================
+        
+        function switchTab(tab) {
+            if (tab === currentTab) return;
+            currentTab = tab;
+            
+            const indicator = document.getElementById('tab-indicator');
+            const tabs = ['info', 'addresses', 'security'];
+            const index = tabs.indexOf(tab);
+            
+            // Move indicator
+            indicator.style.transform = `translateX(${index * 100}%)`;
+            
+            // Update tab styles
+            tabs.forEach((t, i) => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (i === index) {
+                    btn.classList.remove('text-secondary');
+                    btn.classList.add('text-on-surface');
+                } else {
+                    btn.classList.remove('text-on-surface');
+                    btn.classList.add('text-secondary');
+                }
+            });
+            
+            // Show/hide content
+            tabs.forEach(t => {
+                const content = document.getElementById(`tab-content-${t}`);
+                if (t === tab) {
+                    content.classList.remove('hidden');
+                    // Animate content
+                    content.querySelectorAll('.slide-up').forEach((el, i) => {
+                        el.classList.remove('slide-up-visible');
+                        setTimeout(() => el.classList.add('slide-up-visible'), i * 80);
+                    });
+                } else {
+                    content.classList.add('hidden');
+                }
+            });
+        }
+        
+        // ============================================================
+        // EDIT MODE
+        // ============================================================
+        
+        function toggleEditMode(section) {
+            editModes[section] = !editModes[section];
+            const isEditing = editModes[section];
+            
+            if (section === 'info') {
+                const inputs = document.querySelectorAll('#info-form input');
+                const saveBtn = document.getElementById('info-save-btn');
+                const editBtn = document.getElementById('edit-info-btn');
+                
+                inputs.forEach(input => {
+                    input.disabled = !isEditing;
+                    if (isEditing) {
+                        input.classList.remove('disabled:opacity-60', 'disabled:cursor-not-allowed');
+                        input.focus();
+                    }
+                });
+                
+                saveBtn.classList.toggle('hidden', !isEditing);
+                editBtn.textContent = isEditing ? 'Cancel' : 'Edit';
+                
+                if (isEditing) {
+                    document.getElementById('info-form').onsubmit = saveProfileInfo;
+                }
+            } else if (section === 'bio') {
+                const textarea = document.getElementById('info-bio');
+                const saveBtn = document.getElementById('bio-save-btn');
+                const editBtn = document.getElementById('edit-bio-btn');
+                
+                textarea.disabled = !isEditing;
+                if (isEditing) {
+                    textarea.classList.remove('disabled:opacity-60', 'disabled:cursor-not-allowed');
+                    textarea.focus();
+                }
+                
+                saveBtn.classList.toggle('hidden', !isEditing);
+                editBtn.textContent = isEditing ? 'Cancel' : 'Edit';
+            }
+        }
+        
+        // ============================================================
+        // SAVE PROFILE
+        // ============================================================
+        
+        async function saveProfileInfo(e) {
+            e.preventDefault();
+            showLoading(true);
+            
+            try {
+                const user = await getCurrentUser();
+                if (!user) return;
+                
+                const updates = {
+                    full_name: document.getElementById('info-name').value,
+                    phone: document.getElementById('info-phone').value,
+                    updated_at: new Date().toISOString()
+                };
+                
+                const result = await updateUserProfile(user.id, updates);
+                
+                if (result.success) {
+                    showAuthSuccess('Profile updated successfully!');
+                    toggleEditMode('info');
+                    await loadProfile();
+                } else {
+                    showAuthError(result.error?.message || 'Failed to update profile');
+                }
+            } catch (error) {
+                showAuthError('An error occurred');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function saveBio() {
+            showLoading(true);
+            
+            try {
+                const user = await getCurrentUser();
+                if (!user) return;
+                
+                const result = await updateUserProfile(user.id, {
+                    bio: document.getElementById('info-bio').value,
+                    updated_at: new Date().toISOString()
+                });
+                
+                if (result.success) {
+                    showAuthSuccess('Bio updated successfully!');
+                    toggleEditMode('bio');
+                } else {
+                    showAuthError(result.error?.message || 'Failed to update bio');
+                }
+            } catch (error) {
+                showAuthError('An error occurred');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // ============================================================
+        // AVATAR UPLOAD
+        // ============================================================
+        
+        async function handleAvatarUpload(input) {
+            const file = input.files[0];
+            if (!file) return;
+            
+            showLoading(true);
+            
+            try {
+                const user = await getCurrentUser();
+                if (!user) return;
+                
+                const result = await uploadAvatar(user.id, file);
+                
+                if (result.success) {
+                    // Update profile with new avatar URL
+                    await updateUserProfile(user.id, {
+                        avatar_url: result.url,
+                        updated_at: new Date().toISOString()
+                    });
+                    
+                    showAuthSuccess('Avatar updated!');
+                    await loadProfile();
+                } else {
+                    showAuthError('Failed to upload avatar');
+                }
+            } catch (error) {
+                showAuthError('An error occurred');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        // ============================================================
+        // PASSWORD
+        // ============================================================
+        
+        async function changePassword(e) {
+            e.preventDefault();
+            
+            const currentPass = document.getElementById('current-password').value;
+            const newPass = document.getElementById('new-password').value;
+            const confirmPass = document.getElementById('confirm-password').value;
+            
+            if (newPass !== confirmPass) {
+                showAuthError('Passwords do not match');
+                return;
+            }
+            
+            if (newPass.length < 6) {
+                showAuthError('Password must be at least 6 characters');
+                return;
+            }
+            
+            showLoading(true);
+            
+            try {
+                const supabase = getSupabase();
+                const { error } = await supabase.auth.updateUser({
+                    password: newPass
+                });
+                
+                if (error) throw error;
+                
+                showAuthSuccess('Password updated successfully!');
+                document.getElementById('password-form').reset();
+            } catch (error) {
+                showAuthError(error.message || 'Failed to update password');
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function checkPasswordStrength(password) {
+            const bars = [
+                document.getElementById('strength-1'),
+                document.getElementById('strength-2'),
+                document.getElementById('strength-3'),
+                document.getElementById('strength-4')
+            ];
+            const text = document.getElementById('strength-text');
+            
+            let strength = 0;
+            if (password.length >= 6) strength++;
+            if (password.length >= 8) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/[0-9!@#$%^&*]/.test(password)) strength++;
+            
+            const colors = ['bg-surface-container-high', 'bg-error', 'bg-tertiary', 'bg-[#20c997]', 'bg-primary'];
+            const labels = ['Too short', 'Weak', 'Fair', 'Good', 'Strong'];
+            
+            bars.forEach((bar, index) => {
+                if (index < strength) {
+                    bar.className = `h-1 flex-1 ${colors[strength]} rounded-full`;
+                } else {
+                    bar.className = 'h-1 flex-1 bg-surface-container-high rounded-full';
+                }
+            });
+            
+            text.textContent = labels[strength];
+            text.className = `font-label-sm mt-1 ${strength <= 1 ? 'text-error' : strength === 2 ? 'text-tertiary' : 'text-[#20c997]'}`;
+        }
+        
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('.material-symbols-outlined');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.textContent = 'visibility';
+            } else {
+                input.type = 'password';
+                icon.textContent = 'visibility_off';
+            }
+        }
+        
+        // ============================================================
+        // ADDRESS MANAGEMENT
+        // ============================================================
+        
+        function openAddressModal(addressId = null) {
+            const modal = document.getElementById('address-modal');
+            const title = document.getElementById('modal-title');
+            
+            if (addressId) {
+                title.textContent = 'Edit Address';
+                document.getElementById('address-id').value = addressId;
+                // Load address data (mock)
+            } else {
+                title.textContent = 'Add Address';
+                document.getElementById('address-form').reset();
+                document.getElementById('address-id').value = '';
+            }
+            
+            modal.classList.remove('hidden');
+        }
+        
+        function closeAddressModal() {
+            document.getElementById('address-modal').classList.add('hidden');
+        }
+        
+        async function saveAddress(e) {
+            e.preventDefault();
+            showLoading(true);
+            
+            // Mock save - implement with real Supabase
+            setTimeout(() => {
+                showAuthSuccess('Address saved!');
+                closeAddressModal();
+                showLoading(false);
+            }, 1000);
+        }
+        
+        function editAddress(id) {
+            openAddressModal(id);
+        }
+        
+        function deleteAddress(id) {
+            if (confirm('Delete this address?')) {
+                showAuthSuccess('Address deleted!');
+            }
+        }
+        
+        // ============================================================
+        // DELETE ACCOUNT
+        // ============================================================
+        
+        function confirmDeleteAccount() {
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('delete-modal').classList.add('hidden');
+        }
+        
+        async function deleteAccount() {
+            showLoading(true);
+            
+            try {
+                const user = await getCurrentUser();
+                if (!user) return;
+                
+                // Delete user data from profiles
+                const supabase = getSupabase();
+                await supabase.from('profiles').delete().eq('id', user.id);
+                
+                // Sign out
+                await signOut();
+                
+                showAuthSuccess('Account deleted');
+                setTimeout(() => {
+                    window.location.href = '../login.html';
+                }, 1500);
+            } catch (error) {
+                showAuthError('Failed to delete account');
+                showLoading(false);
+            }
+        }
+        
+        // ============================================================
+        // SETTINGS
+        // ============================================================
+        
+        function openSettings() {
+            // Navigate to settings page or show settings modal
+            showAuthSuccess('Settings coming soon!');
+        }
+        
+        // ============================================================
+        // UI HELPERS
+        // ============================================================
+        
+        function showLoading(show) {
+            document.getElementById('page-loading').classList.toggle('hidden', !show);
+        }
+        
+        function showAuthError(message) {
+            const banner = document.getElementById('auth-error');
+            document.getElementById('auth-error-text').textContent = message;
+            banner.classList.remove('hidden');
+            setTimeout(() => banner.classList.add('hidden'), 5000);
+        }
+        
+        function showAuthSuccess(message) {
+            const banner = document.getElementById('auth-success');
+            document.getElementById('auth-success-text').textContent = message;
+            banner.classList.remove('hidden');
+            setTimeout(() => banner.classList.add('hidden'), 5000);
+        }
+        
+        // Close modals on backdrop click
+        document.getElementById('address-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeAddressModal();
+        });
+        document.getElementById('delete-modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeDeleteModal();
+        });
+    </script>
+</body>
+</html>
