@@ -1,14 +1,10 @@
-
-<!-- # Create the customer/booking.html file with complete booking functionality
-# This preserves the exact Stitch.ai UI design while adding Supabase functionality -->
-
-booking_html = '''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
     <meta name="theme-color" content="#0057cd"/>
-    <title>Book Service | Plumbly</title>
+    <title>Track Service | Plumbly</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -19,6 +15,9 @@ booking_html = '''<!DOCTYPE html>
     
     <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    
+    <!-- Leaflet CSS (Free Map) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     
     <script id="tailwind-config">
         tailwind.config = {
@@ -123,100 +122,130 @@ booking_html = '''<!DOCTYPE html>
         body { min-height: 100dvh; }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         
-        /* Service type selection */
-        .service-option {
-            transition: all 0.3s cubic-bezier(0.33, 1, 0.68, 1);
-            cursor: pointer;
+        /* Map container */
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
-        .service-option:hover {
-            transform: translateY(-2px);
-        }
-        .service-option.selected {
-            border-color: #0057cd;
-            background: rgba(0, 87, 205, 0.05);
-            box-shadow: 0 4px 16px rgba(0, 87, 205, 0.1);
-        }
-        .service-option.selected .service-icon {
+        
+        /* Custom map markers */
+        .custom-marker {
             background: #0057cd;
-            color: white;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,87,205,0.4);
+        }
+        .custom-marker.pulse {
+            animation: marker-pulse 2s ease-in-out infinite;
+        }
+        @keyframes marker-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,87,205,0.4); }
+            50% { box-shadow: 0 0 0 15px rgba(0,87,205,0); }
         }
         
-        /* Time slot selection */
-        .time-slot {
-            transition: all 0.2s ease;
-            cursor: pointer;
+        /* Status timeline */
+        .timeline-item {
+            position: relative;
+            padding-left: 32px;
         }
-        .time-slot:hover {
-            border-color: #0057cd;
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 24px;
+            bottom: -8px;
+            width: 2px;
+            background: #ebeef3;
         }
-        .time-slot.selected {
-            background: #0057cd;
-            color: white;
-            border-color: #0057cd;
-        }
-        .time-slot.selected .slot-price {
-            color: rgba(255,255,255,0.8);
-        }
-        
-        /* Address card */
-        .address-card {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .address-card:hover {
-            border-color: #0057cd;
-            background: rgba(0, 87, 205, 0.02);
-        }
-        .address-card.selected {
-            border-color: #0057cd;
-            background: rgba(0, 87, 205, 0.05);
-        }
-        
-        /* Form step animation */
-        .form-step {
+        .timeline-item:last-child::before {
             display: none;
-            opacity: 0;
-            transform: translateX(20px);
         }
-        .form-step.active {
-            display: block;
-            animation: stepIn 0.4s cubic-bezier(0.33, 1, 0.68, 1) forwards;
-        }
-        @keyframes stepIn {
-            to { opacity: 1; transform: translateX(0); }
-        }
-        
-        /* Progress bar */
-        .progress-bar {
-            transition: width 0.5s cubic-bezier(0.33, 1, 0.68, 1);
-        }
-        
-        /* Provider card in booking */
-        .provider-select-card {
+        .timeline-dot {
+            position: absolute;
+            left: 0;
+            top: 4px;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #ebeef3;
+            border: 2px solid #c2c6d8;
             transition: all 0.3s ease;
-            cursor: pointer;
         }
-        .provider-select-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-        }
-        .provider-select-card.selected {
+        .timeline-item.active .timeline-dot {
+            background: #0057cd;
             border-color: #0057cd;
-            background: rgba(0, 87, 205, 0.05);
+            box-shadow: 0 0 0 4px rgba(0,87,205,0.2);
+        }
+        .timeline-item.completed .timeline-dot {
+            background: #20c997;
+            border-color: #20c997;
         }
         
-        /* Price breakdown */
-        .price-row {
+        /* Provider card on map */
+        .provider-float-card {
+            transition: all 0.3s ease;
+        }
+        .provider-float-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        }
+        
+        /* ETA badge */
+        .eta-badge {
+            animation: eta-pulse 2s ease-in-out infinite;
+        }
+        @keyframes eta-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        /* Chat message bubbles */
+        .chat-bubble {
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+        .chat-bubble.sent {
+            background: #0057cd;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-bubble.received {
+            background: #ebeef3;
+            color: #181c20;
+            border-bottom-left-radius: 4px;
+        }
+        
+        /* Action button ripple */
+        .action-btn {
+            position: relative;
+            overflow: hidden;
+        }
+        .action-btn::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 0.5s, opacity 0.3s;
+        }
+        .action-btn:active::after {
+            transform: scale(2);
+            opacity: 1;
+            transition: 0s;
+        }
+        
+        /* Bottom sheet for actions */
+        .action-sheet-item {
             transition: all 0.2s ease;
         }
-        
-        /* Bottom sheet for map */
-        .map-sheet {
-            transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+        .action-sheet-item:hover {
+            background: rgba(0,87,205,0.05);
         }
         
-        /* Loading state */
-        .booking-loading {
+        /* Loading shimmer for map */
+        .map-loading {
             background: linear-gradient(90deg, #ebeef3 25%, #f1f4f9 50%, #ebeef3 75%);
             background-size: 200% 100%;
             animation: skeleton-loading 1.5s infinite;
@@ -228,316 +257,317 @@ booking_html = '''<!DOCTYPE html>
     </style>
 </head>
 
-<body class="bg-background text-on-background font-body-md min-h-screen pb-24">
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col">
     
     <!-- Sticky TopAppBar -->
     <header class="flex justify-between items-center w-full px-margin-mobile h-16 sticky top-0 z-40 backdrop-blur-md bg-surface/90 border-b border-outline-variant/30">
         <button class="p-2 rounded-full hover:bg-surface-container transition-colors" onclick="goBack()">
             <span class="material-symbols-outlined text-on-surface text-[24px]">arrow_back</span>
         </button>
-        <h1 class="font-h3 text-h3 text-on-surface">Book Service</h1>
-        <div class="w-10"></div>
+        <div class="flex flex-col items-center">
+            <h1 class="font-h3 text-h3 text-on-surface">Track Service</h1>
+            <span id="booking-status-badge" class="font-label-sm text-[10px] px-2 py-0.5 bg-tertiary/10 text-tertiary rounded-full uppercase tracking-wider">Pending</span>
+        </div>
+        <button class="p-2 rounded-full hover:bg-surface-container transition-colors" onclick="showMoreOptions()">
+            <span class="material-symbols-outlined text-on-surface text-[24px]">more_vert</span>
+        </button>
     </header>
     
-    <!-- Progress Bar -->
-    <div class="px-margin-mobile mt-stack-sm">
-        <div class="flex items-center gap-2 mb-1">
-            <span id="step-label" class="font-label-sm text-secondary">Step 1 of 4</span>
-        </div>
-        <div class="h-1.5 bg-surface-container-high rounded-full overflow-hidden">
-            <div id="progress-bar" class="progress-bar h-full bg-primary rounded-full" style="width: 25%"></div>
-        </div>
-    </div>
-    
-    <main class="flex flex-col gap-stack-lg pt-stack-md px-margin-mobile">
-        
-        <!-- Step 1: Service Type -->
-        <section id="step-1" class="form-step active">
-            <div class="mb-stack-md">
-                <h2 class="font-h2 text-h2 text-on-surface mb-1">What do you need?</h2>
-                <p class="font-body-md text-secondary">Select the type of plumbing service</p>
+    <main class="flex-1 flex flex-col">
+        <!-- Map Section -->
+        <div class="relative h-[50vh] min-h-[300px]">
+            <div id="map" class="w-full h-full"></div>
+            
+            <!-- Map Loading State -->
+            <div id="map-loading" class="absolute inset-0 bg-surface-container-high flex items-center justify-center z-[5]">
+                <div class="text-center">
+                    <div class="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mx-auto mb-3"></div>
+                    <p class="font-body-sm text-secondary">Loading map...</p>
+                </div>
             </div>
             
-            <div class="grid grid-cols-2 gap-3" id="service-options">
-                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="emergency" onclick="selectService('emergency')">
-                    <div class="service-icon w-12 h-12 bg-error/10 rounded-xl flex items-center justify-center mb-3 transition-all">
-                        <span class="material-symbols-outlined text-error text-[24px]">emergency</span>
+            <!-- Provider Floating Card -->
+            <div id="provider-float-card" class="provider-float-card absolute bottom-4 left-4 right-4 bg-surface/95 backdrop-blur-md rounded-2xl p-4 shadow-lg border border-outline-variant/30 z-[10] hidden">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0">
+                        <img id="provider-avatar" src="" class="w-full h-full object-cover" alt="Provider">
                     </div>
-                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Emergency</h3>
-                    <p class="font-label-sm text-secondary">Urgent repairs needed</p>
-                </div>
-                
-                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="repair" onclick="selectService('repair')">
-                    <div class="service-icon w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-3 transition-all">
-                        <span class="material-symbols-outlined text-primary text-[24px]">build</span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span id="provider-name" class="font-label-md text-on-surface truncate">Loading...</span>
+                            <span class="px-2 py-0.5 bg-[#20c997]/10 text-[#20c997] text-[10px] font-bold rounded-full uppercase">Pro</span>
+                        </div>
+                        <div class="flex items-center gap-3 mt-0.5">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[14px] text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
+                                <span id="provider-rating" class="font-label-sm text-tertiary">4.9</span>
+                            </div>
+                            <div class="flex items-center gap-1 eta-badge">
+                                <span class="material-symbols-outlined text-[14px] text-primary">schedule</span>
+                                <span id="provider-eta" class="font-label-sm text-primary font-semibold">12 min away</span>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Repair</h3>
-                    <p class="font-label-sm text-secondary">Fix leaks & pipes</p>
-                </div>
-                
-                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="installation" onclick="selectService('installation')">
-                    <div class="service-icon w-12 h-12 bg-tertiary/10 rounded-xl flex items-center justify-center mb-3 transition-all">
-                        <span class="material-symbols-outlined text-tertiary text-[24px]">plumbing</span>
-                    </div>
-                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Installation</h3>
-                    <p class="font-label-sm text-secondary">New fixtures & pipes</p>
-                </div>
-                
-                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="maintenance" onclick="selectService('maintenance')">
-                    <div class="service-icon w-12 h-12 bg-[#20c997]/10 rounded-xl flex items-center justify-center mb-3 transition-all">
-                        <span class="material-symbols-outlined text-[#20c997] text-[24px]">construction</span>
-                    </div>
-                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Maintenance</h3>
-                    <p class="font-label-sm text-secondary">Regular checkups</p>
-                </div>
-                
-                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="drain_cleaning" onclick="selectService('drain_cleaning')">
-                    <div class="service-icon w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mb-3 transition-all">
-                        <span class="material-symbols-outlined text-primary text-[24px]">cleaning_services</span>
-                    </div>
-                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Drain Cleaning</h3>
-                    <p class="font-label-sm text-secondary">Unclog drains</p>
-                </div>
-                
-                <div class="service-option p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl" data-service="water_heater" onclick="selectService('water_heater')">
-                    <div class="service-icon w-12 h-12 bg-tertiary/10 rounded-xl flex items-center justify-center mb-3 transition-all">
-                        <span class="material-symbols-outlined text-tertiary text-[24px]">water_heater</span>
-                    </div>
-                    <h3 class="font-label-md text-label-md text-on-surface mb-1">Water Heater</h3>
-                    <p class="font-label-sm text-secondary">Repair or replace</p>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Step 2: Location & Description -->
-        <section id="step-2" class="form-step">
-            <div class="mb-stack-md">
-                <h2 class="font-h2 text-h2 text-on-surface mb-1">Where & What?</h2>
-                <p class="font-body-md text-secondary">Enter your location and describe the issue</p>
-            </div>
-            
-            <!-- Address Selection -->
-            <div class="mb-stack-lg">
-                <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Service Address</label>
-                
-                <!-- Saved Addresses -->
-                <div id="saved-addresses" class="space-y-3 mb-3">
-                    <!-- Populated by JS -->
-                </div>
-                
-                <!-- Add New Address -->
-                <button class="w-full p-4 border-2 border-dashed border-outline-variant rounded-2xl flex items-center gap-3 text-secondary hover:border-primary hover:text-primary transition-all" onclick="showAddressMap()">
-                    <span class="material-symbols-outlined text-[24px]">add_location</span>
-                    <span class="font-label-md">Add New Address</span>
-                </button>
-            </div>
-            
-            <!-- Description -->
-            <div class="mb-stack-lg">
-                <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Describe the Issue</label>
-                <textarea 
-                    id="issue-description"
-                    class="w-full h-32 p-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 focus:outline-none resize-none"
-                    placeholder="e.g., Kitchen sink is leaking from the pipe under the cabinet..."
-                    oninput="updateBookingData('description', this.value)"
-                ></textarea>
-                <p class="font-label-sm text-secondary mt-1 text-right"><span id="desc-count">0</span>/500</p>
-            </div>
-            
-            <!-- Photo Upload -->
-            <div class="mb-stack-lg">
-                <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Add Photos (Optional)</label>
-                <div class="flex gap-3 flex-wrap" id="photo-preview">
-                    <button class="w-20 h-20 border-2 border-dashed border-outline-variant rounded-xl flex items-center justify-center text-secondary hover:border-primary hover:text-primary transition-all" onclick="document.getElementById('photo-input').click()">
-                        <span class="material-symbols-outlined text-[24px]">add_a_photo</span>
+                    <button class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary hover:bg-primary/20 transition-colors" onclick="callProvider()">
+                        <span class="material-symbols-outlined text-[20px]">phone</span>
                     </button>
                 </div>
-                <input type="file" id="photo-input" class="hidden" accept="image/*" multiple onchange="handlePhotoUpload(this.files)">
-            </div>
-        </section>
-        
-        <!-- Step 3: Select Provider -->
-        <section id="step-3" class="form-step">
-            <div class="mb-stack-md">
-                <h2 class="font-h2 text-h2 text-on-surface mb-1">Choose a Plumber</h2>
-                <p class="font-body-md text-secondary">Available providers near you</p>
             </div>
             
-            <!-- Provider List -->
-            <div id="provider-list" class="space-y-3">
+            <!-- ETA Overlay (top) -->
+            <div id="eta-overlay" class="absolute top-4 left-4 right-4 bg-surface/95 backdrop-blur-md rounded-2xl p-4 shadow-lg border border-outline-variant/30 z-[10] hidden">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary">local_shipping</span>
+                        </div>
+                        <div>
+                            <p class="font-label-md text-on-surface">Provider is on the way</p>
+                            <p id="eta-text" class="font-label-sm text-secondary">Estimated arrival: 12 min</p>
+                        </div>
+                    </div>
+                    <span id="eta-time" class="font-h2 text-h2 text-primary">12<span class="text-[14px] font-normal">min</span></span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Sheet Content -->
+        <div class="flex-1 bg-surface rounded-t-[32px] -mt-6 relative z-[20] overflow-hidden flex flex-col">
+            <!-- Drag Handle -->
+            <div class="w-12 h-1.5 bg-outline-variant rounded-full mx-auto mt-3 mb-4"></div>
+            
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto hide-scrollbar px-margin-mobile pb-stack-lg">
+                
+                <!-- Status Timeline -->
+                <section class="mb-stack-lg">
+                    <h2 class="font-h3 text-h3 text-on-surface mb-stack-md">Service Status</h2>
+                    <div id="status-timeline" class="space-y-1">
+                        <div class="timeline-item active" data-status="pending">
+                            <div class="timeline-dot"></div>
+                            <div class="pb-4">
+                                <p class="font-label-md text-on-surface">Request Sent</p>
+                                <p class="font-body-sm text-secondary">Waiting for plumber to accept</p>
+                                <p class="font-label-sm text-secondary mt-1" id="time-pending">Just now</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item" data-status="accepted">
+                            <div class="timeline-dot"></div>
+                            <div class="pb-4">
+                                <p class="font-label-md text-on-surface">Plumber Assigned</p>
+                                <p class="font-body-sm text-secondary">Plumber is preparing to arrive</p>
+                                <p class="font-label-sm text-secondary mt-1 hidden" id="time-accepted"></p>
+                            </div>
+                        </div>
+                        <div class="timeline-item" data-status="started">
+                            <div class="timeline-dot"></div>
+                            <div class="pb-4">
+                                <p class="font-label-md text-on-surface">Service Started</p>
+                                <p class="font-body-sm text-secondary">Plumber is working on your request</p>
+                                <p class="font-label-sm text-secondary mt-1 hidden" id="time-started"></p>
+                            </div>
+                        </div>
+                        <div class="timeline-item" data-status="completed">
+                            <div class="timeline-dot"></div>
+                            <div class="pb-4">
+                                <p class="font-label-md text-on-surface">Service Completed</p>
+                                <p class="font-body-sm text-secondary">Please rate your experience</p>
+                                <p class="font-label-sm text-secondary mt-1 hidden" id="time-completed"></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Booking Details -->
+                <section class="mb-stack-lg">
+                    <h2 class="font-h3 text-h3 text-on-surface mb-stack-md">Booking Details</h2>
+                    <div class="bg-surface-container-lowest rounded-2xl p-stack-lg border border-outline-variant/50">
+                        <div class="flex items-center gap-3 mb-stack-md pb-stack-md border-b border-outline-variant/30">
+                            <div id="detail-icon" class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+                                <span class="material-symbols-outlined text-primary text-[24px]">plumbing</span>
+                            </div>
+                            <div>
+                                <h3 id="detail-service" class="font-label-md text-on-surface">Installation</h3>
+                                <p id="detail-category" class="font-label-sm text-secondary">Plumbing Service</p>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">location_on</span>
+                                <div>
+                                    <p class="font-label-sm text-secondary">Address</p>
+                                    <p id="detail-address" class="font-body-md text-on-surface">123 Main Street, Apt 4B</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">schedule</span>
+                                <div>
+                                    <p class="font-label-sm text-secondary">Booked</p>
+                                    <p id="detail-time" class="font-body-md text-on-surface">Today, 2:30 PM</p>
+                                </div>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">payments</span>
+                                <div>
+                                    <p class="font-label-sm text-secondary">Price</p>
+                                    <p id="detail-price" class="font-body-md text-on-surface">$140.00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Quick Actions -->
+                <section class="mb-stack-lg">
+                    <h2 class="font-h3 text-h3 text-on-surface mb-stack-md">Quick Actions</h2>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="action-btn p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl flex flex-col items-center gap-2 hover:border-primary/50 transition-colors" onclick="callProvider()">
+                            <span class="material-symbols-outlined text-primary text-[24px]">phone</span>
+                            <span class="font-label-md text-on-surface">Call</span>
+                        </button>
+                        <button class="action-btn p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl flex flex-col items-center gap-2 hover:border-primary/50 transition-colors" onclick="openChat()">
+                            <span class="material-symbols-outlined text-primary text-[24px]">chat</span>
+                            <span class="font-label-md text-on-surface">Message</span>
+                        </button>
+                        <button class="action-btn p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl flex flex-col items-center gap-2 hover:border-primary/50 transition-colors" onclick="shareLocation()">
+                            <span class="material-symbols-outlined text-primary text-[24px]">share_location</span>
+                            <span class="font-label-md text-on-surface">Share</span>
+                        </button>
+                        <button class="action-btn p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl flex flex-col items-center gap-2 hover:border-error/50 transition-colors" onclick="cancelBooking()">
+                            <span class="material-symbols-outlined text-error text-[24px]">cancel</span>
+                            <span class="font-label-md text-on-surface">Cancel</span>
+                        </button>
+                    </div>
+                </section>
+                
+                <!-- Chat Preview (if messages exist) -->
+                <section id="chat-preview-section" class="mb-stack-lg hidden">
+                    <div class="flex items-center justify-between mb-stack-md">
+                        <h2 class="font-h3 text-h3 text-on-surface">Messages</h2>
+                        <button class="font-label-md text-primary" onclick="openChat()">View All</button>
+                    </div>
+                    <div id="chat-messages" class="bg-surface-container-lowest rounded-2xl p-stack-md border border-outline-variant/50 max-h-48 overflow-y-auto hide-scrollbar">
+                        <!-- Populated by JS -->
+                    </div>
+                </section>
+                
+            </div>
+        </div>
+    </main>
+    
+    <!-- Chat Modal -->
+    <div id="chat-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-end">
+        <div class="bg-surface w-full max-w-lg mx-auto rounded-t-[32px] h-[80vh] flex flex-col">
+            <!-- Chat Header -->
+            <div class="flex items-center gap-3 p-4 border-b border-outline-variant/30">
+                <button class="p-2 rounded-full hover:bg-surface-container transition-colors" onclick="closeChat()">
+                    <span class="material-symbols-outlined text-[24px]">expand_more</span>
+                </button>
+                <div class="w-10 h-10 rounded-full overflow-hidden">
+                    <img id="chat-avatar" src="" class="w-full h-full object-cover" alt="Provider">
+                </div>
+                <div class="flex-1">
+                    <p id="chat-name" class="font-label-md text-on-surface">Provider</p>
+                    <p class="font-label-sm text-secondary flex items-center gap-1">
+                        <span class="w-2 h-2 bg-[#20c997] rounded-full"></span>
+                        Online
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Chat Messages -->
+            <div id="chat-container" class="flex-1 overflow-y-auto p-4 space-y-3 hide-scrollbar">
                 <!-- Populated by JS -->
             </div>
             
-            <!-- Loading State -->
-            <div id="provider-loading" class="space-y-3">
-                <div class="p-4 bg-surface-container-lowest rounded-2xl flex gap-4">
-                    <div class="w-16 h-16 rounded-xl booking-loading flex-shrink-0"></div>
-                    <div class="flex-1 space-y-2">
-                        <div class="h-4 booking-loading rounded w-2/3"></div>
-                        <div class="h-3 booking-loading rounded w-1/2"></div>
-                    </div>
-                </div>
-                <div class="p-4 bg-surface-container-lowest rounded-2xl flex gap-4">
-                    <div class="w-16 h-16 rounded-xl booking-loading flex-shrink-0"></div>
-                    <div class="flex-1 space-y-2">
-                        <div class="h-4 booking-loading rounded w-2/3"></div>
-                        <div class="h-3 booking-loading rounded w-1/2"></div>
-                    </div>
+            <!-- Chat Input -->
+            <div class="p-4 border-t border-outline-variant/30">
+                <div class="flex items-center gap-2">
+                    <input 
+                        id="chat-input"
+                        type="text"
+                        class="flex-1 h-12 px-4 bg-surface-container-low rounded-xl font-body-md text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 focus:outline-none"
+                        placeholder="Type a message..."
+                        onkeypress="if(event.key==='Enter')sendMessage()"
+                    />
+                    <button class="w-12 h-12 bg-primary rounded-xl flex items-center justify-center text-white active:scale-95 transition-transform" onclick="sendMessage()">
+                        <span class="material-symbols-outlined">send</span>
+                    </button>
                 </div>
             </div>
-        </section>
-        
-        <!-- Step 4: Review & Confirm -->
-        <section id="step-4" class="form-step">
-            <div class="mb-stack-md">
-                <h2 class="font-h2 text-h2 text-on-surface mb-1">Review & Confirm</h2>
-                <p class="font-body-md text-secondary">Double-check your booking details</p>
-            </div>
-            
-            <!-- Booking Summary Card -->
-            <div class="bg-surface-container-lowest rounded-2xl p-stack-lg mb-stack-lg border border-outline-variant/50">
-                <!-- Service Type -->
-                <div class="flex items-center gap-3 mb-stack-md pb-stack-md border-b border-outline-variant/30">
-                    <div id="summary-icon" class="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <span class="material-symbols-outlined text-primary text-[24px]">plumbing</span>
-                    </div>
-                    <div>
-                        <h3 id="summary-service" class="font-h3 text-h3 text-on-surface">Installation</h3>
-                        <p id="summary-category" class="font-body-sm text-secondary">Plumbing Service</p>
-                    </div>
-                </div>
-                
-                <!-- Details -->
-                <div class="space-y-3 mb-stack-md">
-                    <div class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">location_on</span>
-                        <div>
-                            <p class="font-label-sm text-secondary">Address</p>
-                            <p id="summary-address" class="font-body-md text-on-surface">123 Main Street, Apt 4B</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">description</span>
-                        <div>
-                            <p class="font-label-sm text-secondary">Description</p>
-                            <p id="summary-description" class="font-body-md text-on-surface">Kitchen sink leaking...</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-secondary text-[20px] mt-0.5">person</span>
-                        <div>
-                            <p class="font-label-sm text-secondary">Provider</p>
-                            <p id="summary-provider" class="font-body-md text-on-surface">John Smith</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Price Breakdown -->
-                <div class="border-t border-outline-variant/30 pt-stack-md">
-                    <h4 class="font-label-md text-label-md text-secondary mb-3">Price Estimate</h4>
-                    <div class="space-y-2">
-                        <div class="flex justify-between price-row">
-                            <span class="font-body-md text-secondary">Base Service Fee</span>
-                            <span id="price-base" class="font-body-md text-on-surface">$45.00</span>
-                        </div>
-                        <div class="flex justify-between price-row">
-                            <span class="font-body-md text-secondary">Estimated Labor (2 hrs)</span>
-                            <span id="price-labor" class="font-body-md text-on-surface">$90.00</span>
-                        </div>
-                        <div class="flex justify-between price-row">
-                            <span class="font-body-md text-secondary">Platform Fee</span>
-                            <span id="price-platform" class="font-body-md text-on-surface">$5.00</span>
-                        </div>
-                        <div class="flex justify-between pt-2 border-t border-outline-variant/30">
-                            <span class="font-h3 text-h3 text-on-surface">Total Estimate</span>
-                            <span id="price-total" class="font-h3 text-h3 text-primary">$140.00</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Payment Method -->
-            <div class="mb-stack-lg">
-                <label class="font-label-md text-label-md text-secondary mb-stack-sm block">Payment Method</label>
-                <div class="p-4 bg-surface-container-lowest border border-outline-variant/50 rounded-2xl flex items-center gap-3">
-                    <div class="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <span class="material-symbols-outlined text-primary">payments</span>
-                    </div>
-                    <div class="flex-1">
-                        <p class="font-label-md text-on-surface">Pay after service</p>
-                        <p class="font-label-sm text-secondary">Cash or card to provider</p>
-                    </div>
-                    <span class="material-symbols-outlined text-primary">check_circle</span>
-                </div>
-            </div>
-            
-            <!-- Terms -->
-            <p class="font-label-sm text-secondary text-center mb-stack-md">
-                By confirming, you agree to our <a href="#" class="text-primary">Terms of Service</a> and <a href="#" class="text-primary">Cancellation Policy</a>
-            </p>
-        </section>
-    </main>
+        </div>
+    </div>
     
-    <!-- Bottom Action Bar -->
-    <div class="fixed bottom-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-md border-t border-outline-variant/30 px-margin-mobile py-4 pb-safe">
-        <div class="flex gap-3">
-            <button id="btn-back" class="flex-1 h-14 bg-surface-container-lowest border border-outline-variant text-on-surface font-h3 text-h3 rounded-2xl active:scale-[0.98] transition-transform hidden" onclick="prevStep()">
-                Back
+    <!-- Cancel Confirmation Modal -->
+    <div id="cancel-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-surface rounded-3xl p-stack-lg max-w-sm w-full text-center shadow-2xl">
+            <div class="w-16 h-16 bg-error/10 rounded-full flex items-center justify-center mx-auto mb-stack-md">
+                <span class="material-symbols-outlined text-error text-[32px]">warning</span>
+            </div>
+            <h3 class="font-h2 text-h2 text-on-surface mb-2">Cancel Booking?</h3>
+            <p class="font-body-md text-secondary mb-stack-lg">You may be charged a cancellation fee depending on the timing.</p>
+            <button class="w-full h-14 bg-error text-white font-h3 text-h3 rounded-2xl mb-3 active:scale-[0.98] transition-transform" onclick="confirmCancel()">
+                Yes, Cancel
             </button>
-            <button id="btn-next" class="flex-1 h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl shadow-lg shadow-primary/30 active:scale-[0.98] transition-transform" onclick="nextStep()">
-                Continue
+            <button class="w-full h-14 bg-surface-container-low text-on-surface font-h3 text-h3 rounded-2xl active:scale-[0.98] transition-transform" onclick="closeCancelModal()">
+                Keep Booking
             </button>
         </div>
     </div>
     
-    <!-- Address Map Sheet (Hidden) -->
-    <div id="address-map-sheet" hidden>
-        <div class="p-6">
-            <h3 class="font-h2 text-h2 text-on-surface mb-stack-md">Select Location</h3>
-            <div id="map-container" class="w-full h-64 bg-surface-container-high rounded-2xl mb-stack-md flex items-center justify-center">
-                <p class="font-body-md text-secondary">Map loading...</p>
+    <!-- Rate Modal (shown after completion) -->
+    <div id="rate-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-surface rounded-3xl p-stack-lg max-w-sm w-full text-center shadow-2xl">
+            <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-stack-md">
+                <span class="material-symbols-outlined text-primary text-[32px]">star</span>
             </div>
-            <input 
-                id="address-input"
-                class="w-full h-14 px-4 bg-surface-container-lowest border-2 border-outline-variant/50 rounded-2xl font-body-md text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 focus:outline-none mb-stack-md"
-                placeholder="Enter full address"
-                type="text"
-            />
-            <button class="w-full h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl active:scale-[0.98] transition-transform" onclick="confirmAddress()">
-                Confirm Address
+            <h3 class="font-h2 text-h2 text-on-surface mb-2">How was the service?</h3>
+            <p class="font-body-md text-secondary mb-stack-md">Rate your experience with the plumber</p>
+            
+            <div class="flex justify-center gap-2 mb-stack-md">
+                <button class="star-btn w-10 h-10 text-secondary hover:text-tertiary transition-colors" data-rating="1" onclick="setRating(1)">
+                    <span class="material-symbols-outlined text-[28px]">star</span>
+                </button>
+                <button class="star-btn w-10 h-10 text-secondary hover:text-tertiary transition-colors" data-rating="2" onclick="setRating(2)">
+                    <span class="material-symbols-outlined text-[28px]">star</span>
+                </button>
+                <button class="star-btn w-10 h-10 text-secondary hover:text-tertiary transition-colors" data-rating="3" onclick="setRating(3)">
+                    <span class="material-symbols-outlined text-[28px]">star</span>
+                </button>
+                <button class="star-btn w-10 h-10 text-secondary hover:text-tertiary transition-colors" data-rating="4" onclick="setRating(4)">
+                    <span class="material-symbols-outlined text-[28px]">star</span>
+                </button>
+                <button class="star-btn w-10 h-10 text-secondary hover:text-tertiary transition-colors" data-rating="5" onclick="setRating(5)">
+                    <span class="material-symbols-outlined text-[28px]">star</span>
+                </button>
+            </div>
+            
+            <textarea 
+                id="review-text"
+                class="w-full h-24 p-3 bg-surface-container-low rounded-xl font-body-md text-on-surface placeholder:text-outline focus:ring-2 focus:ring-primary/20 focus:outline-none resize-none mb-stack-md"
+                placeholder="Share your experience (optional)"
+            ></textarea>
+            
+            <button class="w-full h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl active:scale-[0.98] transition-transform" onclick="submitRating()">
+                Submit Review
             </button>
         </div>
     </div>
     
     <!-- Loading Overlay -->
-    <div id="booking-overlay" class="hidden fixed inset-0 z-[80] bg-surface/90 backdrop-blur-sm flex flex-col items-center justify-center">
+    <div id="loading-overlay" class="hidden fixed inset-0 z-[80] bg-surface/90 backdrop-blur-sm flex flex-col items-center justify-center">
         <div class="relative">
             <div class="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
             <div class="absolute inset-0 flex items-center justify-center">
                 <span class="material-symbols-outlined text-primary text-2xl">water_drop</span>
             </div>
         </div>
-        <p class="mt-4 font-body-md text-secondary animate-pulse">Creating your booking...</p>
-    </div>
-    
-    <!-- Success Modal -->
-    <div id="success-modal" class="hidden fixed inset-0 z-[100] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-surface rounded-3xl p-stack-lg max-w-sm w-full text-center shadow-2xl">
-            <div class="w-20 h-20 bg-[#20c997]/10 rounded-full flex items-center justify-center mx-auto mb-stack-md">
-                <span class="material-symbols-outlined text-[#20c997] text-[40px]">check_circle</span>
-            </div>
-            <h3 class="font-h2 text-h2 text-on-surface mb-2">Booking Confirmed!</h3>
-            <p class="font-body-md text-secondary mb-stack-lg">Your plumber will arrive soon. You can track them in real-time.</p>
-            <button class="w-full h-14 bg-primary text-on-primary font-h3 text-h3 rounded-2xl mb-3 active:scale-[0.98] transition-transform" onclick="goToTracking()">
-                Track Plumber
-            </button>
-            <button class="w-full h-14 bg-surface-container-low text-on-surface font-h3 text-h3 rounded-2xl active:scale-[0.98] transition-transform" onclick="goToDashboard()">
-                Go to Dashboard
-            </button>
-        </div>
+        <p class="mt-4 font-body-md text-secondary animate-pulse">Loading...</p>
     </div>
     
     <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script src="../supabase-config.js"></script>
     <script src="../js/app.js"></script>
     <script src="../js/auth.js"></script>
@@ -545,25 +575,20 @@ booking_html = '''<!DOCTYPE html>
     
     <script>
         // ============================================================
-        // BOOKING FORM STATE
+        // TRACKING STATE
         // ============================================================
         
-        let currentStep = 1;
-        const totalSteps = 4;
-        
-        const bookingData = {
-            serviceType: null,
-            address: null,
-            lat: null,
-            lng: null,
-            description: '',
-            photos: [],
-            providerId: null,
-            price: 0
-        };
-        
-        let availableProviders = [];
-        let savedAddresses = [];
+        let map = null;
+        let customerMarker = null;
+        let providerMarker = null;
+        let routeLine = null;
+        let bookingId = null;
+        let bookingData = null;
+        let providerData = null;
+        let locationSubscription = null;
+        let chatSubscription = null;
+        let currentRating = 0;
+        let watchId = null;
         
         // Initialize
         document.addEventListener('DOMContentLoaded', async () => {
@@ -571,408 +596,105 @@ booking_html = '''<!DOCTYPE html>
             const authed = await requireAuth('customer');
             if (!authed) return;
             
-            // Load saved addresses
-            await loadSavedAddresses();
+            // Get booking ID from URL
+            bookingId = getUrlParam('booking') || localStorage.getItem('lastBookingId');
             
-            // Check for pre-selected provider from URL
-            const providerId = getUrlParam('provider');
-            if (providerId) {
-                bookingData.providerId = providerId;
-            }
-            
-            // Check for pre-selected category
-            const category = getUrlParam('category');
-            if (category) {
-                selectService(category);
-            }
-        });
-        
-        // ============================================================
-        // STEP NAVIGATION
-        // ============================================================
-        
-        function nextStep() {
-            if (!validateCurrentStep()) return;
-            
-            if (currentStep < totalSteps) {
-                // Hide current step
-                document.getElementById(`step-${currentStep}`).classList.remove('active');
-                
-                currentStep++;
-                
-                // Show next step
-                document.getElementById(`step-${currentStep}`).classList.add('active');
-                
-                // Update progress
-                updateProgress();
-                
-                // Load step-specific data
-                if (currentStep === 3) {
-                    loadProviders();
-                } else if (currentStep === 4) {
-                    updateSummary();
-                }
-                
-                // Show back button
-                document.getElementById('btn-back').classList.remove('hidden');
-                
-                // Update next button text
-                if (currentStep === totalSteps) {
-                    document.getElementById('btn-next').textContent = 'Confirm Booking';
-                }
-            } else {
-                // Submit booking
-                submitBooking();
-            }
-        }
-        
-        function prevStep() {
-            if (currentStep > 1) {
-                document.getElementById(`step-${currentStep}`).classList.remove('active');
-                currentStep--;
-                document.getElementById(`step-${currentStep}`).classList.add('active');
-                updateProgress();
-                
-                if (currentStep === 1) {
-                    document.getElementById('btn-back').classList.add('hidden');
-                }
-                
-                document.getElementById('btn-next').textContent = 'Continue';
-            }
-        }
-        
-        function updateProgress() {
-            const progress = (currentStep / totalSteps) * 100;
-            document.getElementById('progress-bar').style.width = `${progress}%`;
-            document.getElementById('step-label').textContent = `Step ${currentStep} of ${totalSteps}`;
-        }
-        
-        function validateCurrentStep() {
-            switch (currentStep) {
-                case 1:
-                    if (!bookingData.serviceType) {
-                        showToast('Please select a service type', 'error');
-                        return false;
-                    }
-                    return true;
-                case 2:
-                    if (!bookingData.address) {
-                        showToast('Please select an address', 'error');
-                        return false;
-                    }
-                    return true;
-                case 3:
-                    if (!bookingData.providerId) {
-                        showToast('Please select a plumber', 'error');
-                        return false;
-                    }
-                    return true;
-                case 4:
-                    return true;
-                default:
-                    return true;
-            }
-        }
-        
-        // ============================================================
-        // STEP 1: SERVICE SELECTION
-        // ============================================================
-        
-        function selectService(serviceType) {
-            bookingData.serviceType = serviceType;
-            
-            // Update UI
-            document.querySelectorAll('.service-option').forEach(opt => {
-                opt.classList.remove('selected');
-            });
-            
-            const selected = document.querySelector(`[data-service="${serviceType}"]`);
-            if (selected) {
-                selected.classList.add('selected');
-            }
-            
-            // Update summary preview
-            const serviceNames = {
-                emergency: 'Emergency Repair',
-                repair: 'General Repair',
-                installation: 'Installation',
-                maintenance: 'Maintenance',
-                drain_cleaning: 'Drain Cleaning',
-                water_heater: 'Water Heater'
-            };
-            
-            console.log('Selected service:', serviceNames[serviceType]);
-        }
-        
-        // ============================================================
-        // STEP 2: LOCATION & DESCRIPTION
-        // ============================================================
-        
-        async function loadSavedAddresses() {
-            const supabase = getSupabase();
-            const userId = getUserId();
-            if (!supabase || !userId) return;
-            
-            try {
-                const { data: customer } = await supabase
-                    .from(DB_TABLES.CUSTOMERS)
-                    .select('home_address')
-                    .eq('id', userId)
-                    .single();
-                
-                if (customer?.home_address) {
-                    savedAddresses.push({
-                        id: 'home',
-                        label: 'Home',
-                        address: customer.home_address,
-                        isDefault: true
-                    });
-                }
-                
-                renderSavedAddresses();
-                
-            } catch (error) {
-                console.error('Error loading addresses:', error);
-            }
-        }
-        
-        function renderSavedAddresses() {
-            const container = document.getElementById('saved-addresses');
-            container.innerHTML = '';
-            
-            savedAddresses.forEach(addr => {
-                const div = document.createElement('div');
-                div.className = `address-card p-4 bg-surface-container-lowest border-2 rounded-2xl flex items-start gap-3 ${addr.isDefault ? 'border-primary/50 bg-primary/5' : 'border-outline-variant/50'}`;
-                div.onclick = () => selectAddress(addr);
-                
-                div.innerHTML = `
-                    <div class="w-10 h-10 rounded-xl ${addr.isDefault ? 'bg-primary/10' : 'bg-surface-container'} flex items-center justify-center flex-shrink-0">
-                        <span class="material-symbols-outlined ${addr.isDefault ? 'text-primary' : 'text-secondary'}">${addr.isDefault ? 'home' : 'location_on'}</span>
-                    </div>
-                    <div class="flex-1">
-                        <div class="flex items-center gap-2">
-                            <span class="font-label-md text-on-surface">${addr.label}</span>
-                            ${addr.isDefault ? '<span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full">Default</span>' : ''}
-                        </div>
-                        <p class="font-body-sm text-secondary mt-0.5">${addr.address}</p>
-                    </div>
-                    <div class="w-6 h-6 rounded-full border-2 ${addr.isDefault ? 'border-primary bg-primary' : 'border-outline-variant'} flex items-center justify-center flex-shrink-0">
-                        ${addr.isDefault ? '<span class="material-symbols-outlined text-white text-[14px]">check</span>' : ''}
-                    </div>
-                `;
-                
-                container.appendChild(div);
-            });
-        }
-        
-        function selectAddress(addr) {
-            bookingData.address = addr.address;
-            
-            // Update UI
-            document.querySelectorAll('.address-card').forEach(card => {
-                card.classList.remove('selected', 'border-primary', 'bg-primary/5');
-                card.classList.add('border-outline-variant/50');
-            });
-            
-            event.currentTarget.classList.add('selected', 'border-primary', 'bg-primary/5');
-            event.currentTarget.classList.remove('border-outline-variant/50');
-        }
-        
-        function showAddressMap() {
-            showBottomSheet('address-map-sheet');
-            
-            // Initialize map after sheet opens
-            setTimeout(() => {
-                initMap('map-container', (lat, lng, address) => {
-                    bookingData.lat = lat;
-                    bookingData.lng = lng;
-                    document.getElementById('address-input').value = address;
-                });
-            }, 300);
-        }
-        
-        function confirmAddress() {
-            const address = document.getElementById('address-input').value;
-            if (!address) {
-                showToast('Please enter an address', 'error');
+            if (!bookingId) {
+                showToast('No booking found', 'error');
+                setTimeout(() => window.location.href = 'dashboard.html', 2000);
                 return;
             }
             
-            bookingData.address = address;
+            // Load booking data
+            await loadBookingData();
             
-            // Add to saved addresses
-            savedAddresses.push({
-                id: 'new',
-                label: 'New Address',
-                address: address,
-                isDefault: false
-            });
+            // Initialize map
+            initTrackingMap();
             
-            renderSavedAddresses();
-            hideBottomSheet();
-            
-            // Select the new address
-            setTimeout(() => {
-                const cards = document.querySelectorAll('.address-card');
-                if (cards.length > 0) {
-                    cards[cards.length - 1].click();
-                }
-            }, 100);
-        }
-        
-        function updateBookingData(key, value) {
-            bookingData[key] = value;
-            
-            if (key === 'description') {
-                document.getElementById('desc-count').textContent = value.length;
-            }
-        }
-        
-        function handlePhotoUpload(files) {
-            const preview = document.getElementById('photo-preview');
-            
-            Array.from(files).forEach(file => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const div = document.createElement('div');
-                    div.className = 'w-20 h-20 rounded-xl overflow-hidden relative group';
-                    div.innerHTML = `
-                        <img src="${e.target.result}" class="w-full h-full object-cover">
-                        <button class="absolute top-1 right-1 w-6 h-6 bg-black/50 rounded-full flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-opacity" onclick="this.parentElement.remove()">
-                            <span class="material-symbols-outlined text-[14px]">close</span>
-                        </button>
-                    `;
-                    preview.insertBefore(div, preview.lastElementChild);
-                    
-                    bookingData.photos.push(e.target.result);
-                };
-                reader.readAsDataURL(file);
-            });
-        }
+            // Setup real-time subscriptions
+            setupRealtimeTracking();
+            setupChatSubscription();
+        });
         
         // ============================================================
-        // STEP 3: PROVIDER SELECTION
+        // LOAD BOOKING DATA
         // ============================================================
         
-        async function loadProviders() {
+        async function loadBookingData() {
             const supabase = getSupabase();
-            if (!supabase) return;
-            
-            document.getElementById('provider-loading').classList.remove('hidden');
-            document.getElementById('provider-list').classList.add('hidden');
+            if (!supabase || !bookingId) return;
             
             try {
-                // Get online providers
-                const { data: providers, error } = await supabase
-                    .from(DB_TABLES.PROVIDERS)
+                showLoading('Loading booking...');
+                
+                const { data: booking, error } = await supabase
+                    .from(DB_TABLES.BOOKINGS)
                     .select(`
-                        id,
-                        is_online,
-                        rating,
-                        total_jobs,
-                        hourly_rate,
-                        current_location,
-                        profiles!inner(id, name, avatar_url)
+                        *,
+                        provider:provider_id(
+                            id,
+                            rating,
+                            profiles(name, avatar_url, phone)
+                        )
                     `)
-                    .eq('is_online', true)
-                    .order('rating', { ascending: false })
-                    .limit(10);
+                    .eq('id', bookingId)
+                    .single();
                 
                 if (error) throw error;
                 
-                availableProviders = providers || [];
+                bookingData = booking;
+                providerData = booking.provider;
                 
-                document.getElementById('provider-loading').classList.add('hidden');
-                document.getElementById('provider-list').classList.remove('hidden');
+                // Update UI
+                updateBookingUI();
+                updateStatusTimeline(booking.status);
                 
-                renderProviders();
+                // Show provider card if accepted or later
+                if (['accepted', 'started', 'completed'].includes(booking.status)) {
+                    showProviderCard();
+                }
+                
+                // Show rate modal if completed and not rated
+                if (booking.status === 'completed' && !booking.customer_rating) {
+                    setTimeout(() => {
+                        document.getElementById('rate-modal').classList.remove('hidden');
+                    }, 1000);
+                }
+                
+                hideLoading();
                 
             } catch (error) {
-                console.error('Error loading providers:', error);
-                document.getElementById('provider-loading').classList.add('hidden');
-                showToast('Failed to load providers', 'error');
+                console.error('Error loading booking:', error);
+                hideLoading();
+                showToast('Failed to load booking', 'error');
             }
         }
         
-        function renderProviders() {
-            const container = document.getElementById('provider-list');
-            container.innerHTML = '';
+        function updateBookingUI() {
+            if (!bookingData) return;
             
-            // If pre-selected provider, show it first
-            if (bookingData.providerId) {
-                const preSelected = availableProviders.find(p => p.id === bookingData.providerId);
-                if (preSelected) {
-                    const card = createProviderCard(preSelected, true);
-                    container.appendChild(card);
-                }
-            }
+            // Status badge
+            const statusColors = {
+                pending: 'bg-tertiary/10 text-tertiary',
+                accepted: 'bg-primary/10 text-primary',
+                started: 'bg-[#20c997]/10 text-[#20c997]',
+                completed: 'bg-primary/10 text-primary',
+                cancelled: 'bg-error/10 text-error'
+            };
             
-            availableProviders.forEach(provider => {
-                if (provider.id === bookingData.providerId) return; // Skip pre-selected
-                const card = createProviderCard(provider, false);
-                container.appendChild(card);
-            });
-        }
-        
-        function createProviderCard(provider, isPreSelected) {
-            const div = document.createElement('div');
-            div.className = `provider-select-card p-4 bg-surface-container-lowest border-2 rounded-2xl flex gap-4 ${isPreSelected ? 'border-primary bg-primary/5 selected' : 'border-outline-variant/50'}`;
-            div.onclick = () => selectProvider(provider.id, div);
+            const statusLabels = {
+                pending: 'Pending',
+                accepted: 'Accepted',
+                started: 'In Progress',
+                completed: 'Completed',
+                cancelled: 'Cancelled'
+            };
             
-            const avatar = provider.profiles?.avatar_url || `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='64' height='64'><rect fill='%23ebeef3' width='64' height='64'/><text fill='%23727787' x='50%' y='50%' text-anchor='middle' dy='.3em' font-size='28'>?</text></svg>`;
-            const name = provider.profiles?.name || 'Unknown';
-            const rating = provider.rating || 5.0;
-            const jobs = provider.total_jobs || 0;
-            const rate = provider.hourly_rate || 45;
+            const badge = document.getElementById('booking-status-badge');
+            badge.className = `font-label-sm text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider ${statusColors[bookingData.status]}`;
+            badge.textContent = statusLabels[bookingData.status];
             
-            div.innerHTML = `
-                <div class="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0">
-                    <img src="${avatar}" class="w-full h-full object-cover" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2264%22><rect fill=%22%23ebeef3%22 width=%2264%22 height=%2264%22/><text fill=%22%23727787%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 font-size=%2228%22>?</text></svg>'">
-                </div>
-                <div class="flex-1">
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="font-label-md text-on-surface">${name}</span>
-                        <div class="flex items-center gap-1 px-2 py-0.5 bg-tertiary/10 rounded-lg">
-                            <span class="material-symbols-outlined text-[12px] text-tertiary" style="font-variation-settings: 'FILL' 1;">star</span>
-                            <span class="font-label-sm text-tertiary">${rating.toFixed(1)}</span>
-                        </div>
-                    </div>
-                    <p class="font-body-sm text-secondary mb-2">${jobs} jobs completed</p>
-                    <div class="flex items-center justify-between">
-                        <span class="font-label-sm text-secondary">$${rate}/hr</span>
-                        <div class="w-6 h-6 rounded-full border-2 ${isPreSelected ? 'border-primary bg-primary' : 'border-outline-variant'} flex items-center justify-center">
-                            ${isPreSelected ? '<span class="material-symbols-outlined text-white text-[14px]">check</span>' : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            return div;
-        }
-        
-        function selectProvider(providerId, cardElement) {
-            bookingData.providerId = providerId;
-            
-            // Update UI
-            document.querySelectorAll('.provider-select-card').forEach(card => {
-                card.classList.remove('selected', 'border-primary', 'bg-primary/5');
-                card.classList.add('border-outline-variant/50');
-                card.querySelector('.rounded-full').className = 'w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center';
-                card.querySelector('.rounded-full').innerHTML = '';
-            });
-            
-            cardElement.classList.add('selected', 'border-primary', 'bg-primary/5');
-            cardElement.classList.remove('border-outline-variant/50');
-            cardElement.querySelector('.rounded-full').className = 'w-6 h-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center';
-            cardElement.querySelector('.rounded-full').innerHTML = '<span class="material-symbols-outlined text-white text-[14px]">check</span>';
-        }
-        
-        // ============================================================
-        // STEP 4: SUMMARY
-        // ============================================================
-        
-        function updateSummary() {
-            // Service info
+            // Details
             const serviceNames = {
                 emergency: 'Emergency Repair',
                 repair: 'General Repair',
@@ -991,138 +713,494 @@ booking_html = '''<!DOCTYPE html>
                 water_heater: 'water_heater'
             };
             
-            document.getElementById('summary-service').textContent = serviceNames[bookingData.serviceType] || 'Plumbing Service';
-            document.getElementById('summary-icon').innerHTML = `<span class="material-symbols-outlined text-primary text-[24px]">${serviceIcons[bookingData.serviceType] || 'plumbing'}</span>`;
+            document.getElementById('detail-service').textContent = serviceNames[bookingData.service_type] || 'Plumbing Service';
+            document.getElementById('detail-icon').innerHTML = `<span class="material-symbols-outlined text-primary text-[24px]">${serviceIcons[bookingData.service_type] || 'plumbing'}</span>`;
+            document.getElementById('detail-address').textContent = bookingData.address || 'Not specified';
+            document.getElementById('detail-time').textContent = formatDate(bookingData.created_at, 'datetime');
+            document.getElementById('detail-price').textContent = formatCurrency(bookingData.price);
+        }
+        
+        function showProviderCard() {
+            if (!providerData) return;
             
-            // Address
-            document.getElementById('summary-address').textContent = bookingData.address || 'Not specified';
+            const card = document.getElementById('provider-float-card');
+            card.classList.remove('hidden');
             
-            // Description
-            document.getElementById('summary-description').textContent = bookingData.description || 'No description provided';
+            document.getElementById('provider-name').textContent = providerData.profiles?.name || 'Provider';
+            document.getElementById('provider-rating').textContent = (providerData.rating || 5.0).toFixed(1);
             
-            // Provider
-            const provider = availableProviders.find(p => p.id === bookingData.providerId);
-            document.getElementById('summary-provider').textContent = provider?.profiles?.name || 'Auto-assigned';
+            if (providerData.profiles?.avatar_url) {
+                document.getElementById('provider-avatar').src = providerData.profiles.avatar_url;
+            }
             
-            // Price calculation
-            const baseFee = 45;
-            const hourlyRate = provider?.hourly_rate || 45;
-            const estimatedHours = 2;
-            const laborCost = hourlyRate * estimatedHours;
-            const platformFee = 5;
-            const total = baseFee + laborCost + platformFee;
-            
-            bookingData.price = total;
-            
-            document.getElementById('price-base').textContent = formatCurrency(baseFee);
-            document.getElementById('price-labor').textContent = formatCurrency(laborCost);
-            document.getElementById('price-platform').textContent = formatCurrency(platformFee);
-            document.getElementById('price-total').textContent = formatCurrency(total);
+            // Show ETA overlay
+            document.getElementById('eta-overlay').classList.remove('hidden');
         }
         
         // ============================================================
-        // SUBMIT BOOKING
+        // MAP INITIALIZATION
         // ============================================================
         
-        async function submitBooking() {
-            const supabase = getSupabase();
-            const userId = getUserId();
-            if (!supabase || !userId) return;
+        function initTrackingMap() {
+            // Hide loading
+            document.getElementById('map-loading').classList.add('hidden');
             
-            document.getElementById('booking-overlay').classList.remove('hidden');
+            // Default location (will be updated)
+            const defaultLat = bookingData?.lat || 40.7128;
+            const defaultLng = bookingData?.lng || -74.0060;
+            
+            // Initialize Leaflet map
+            map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([defaultLat, defaultLng], 14);
+            
+            // Add tile layer (OpenStreetMap - free)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '© OpenStreetMap'
+            }).addTo(map);
+            
+            // Customer marker (blue)
+            const customerIcon = L.divIcon({
+                className: 'custom-marker',
+                html: '<div style="width:20px;height:20px;background:#0057cd;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,87,205,0.4);"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+            
+            customerMarker = L.marker([defaultLat, defaultLng], { icon: customerIcon }).addTo(map);
+            customerMarker.bindPopup('Your Location').openPopup();
+            
+            // Provider marker (will be updated with real-time data)
+            const providerIcon = L.divIcon({
+                className: 'custom-marker pulse',
+                html: '<div style="width:24px;height:24px;background:#20c997;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(32,201,151,0.4);"></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+            
+            providerMarker = L.marker([defaultLat + 0.01, defaultLng + 0.01], { icon: providerIcon }).addTo(map);
+            
+            // Draw route line
+            routeLine = L.polyline([
+                [defaultLat, defaultLng],
+                [defaultLat + 0.01, defaultLng + 0.01]
+            ], {
+                color: '#0057cd',
+                weight: 4,
+                opacity: 0.7,
+                dashArray: '10, 10'
+            }).addTo(map);
+            
+            // Fit bounds to show both markers
+            const group = new L.featureGroup([customerMarker, providerMarker]);
+            map.fitBounds(group.getBounds().pad(0.2));
+        }
+        
+        // ============================================================
+        // REAL-TIME TRACKING
+        // ============================================================
+        
+        function setupRealtimeTracking() {
+            const supabase = getSupabase();
+            if (!supabase || !bookingId) return;
+            
+            // Listen for booking status changes
+            supabase
+                .channel('booking-tracking-' + bookingId)
+                .on('postgres_changes', {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: DB_TABLES.BOOKINGS,
+                    filter: 'id=eq.' + bookingId
+                }, (payload) => {
+                    console.log('Booking update:', payload);
+                    
+                    const newStatus = payload.new.status;
+                    const oldStatus = payload.old.status;
+                    
+                    // Update status timeline
+                    updateStatusTimeline(newStatus);
+                    
+                    // Update status badge
+                    updateBookingUI();
+                    
+                    // Handle status changes
+                    if (newStatus === 'accepted' && oldStatus === 'pending') {
+                        showToast('Plumber accepted your request!', 'success');
+                        showProviderCard();
+                        loadProviderLocation();
+                    } else if (newStatus === 'started') {
+                        showToast('Service has started!', 'info');
+                    } else if (newStatus === 'completed') {
+                        showToast('Service completed!', 'success');
+                        document.getElementById('rate-modal').classList.remove('hidden');
+                    } else if (newStatus === 'cancelled') {
+                        showToast('Booking cancelled', 'warning');
+                    }
+                })
+                .subscribe();
+            
+            // Listen for provider location updates
+            if (providerData?.id) {
+                supabase
+                    .channel('provider-location-' + providerData.id)
+                    .on('postgres_changes', {
+                        event: '*',
+                        schema: 'public',
+                        table: DB_TABLES.LOCATIONS,
+                        filter: 'provider_id=eq.' + providerData.id
+                    }, (payload) => {
+                        console.log('Location update:', payload);
+                        
+                        if (payload.new) {
+                            updateProviderLocation(payload.new.lat, payload.new.lng);
+                        }
+                    })
+                    .subscribe();
+            }
+        }
+        
+        function updateProviderLocation(lat, lng) {
+            if (!map || !providerMarker) return;
+            
+            // Update marker position
+            providerMarker.setLatLng([lat, lng]);
+            
+            // Update route line
+            if (customerMarker && routeLine) {
+                const customerPos = customerMarker.getLatLng();
+                routeLine.setLatLngs([
+                    [customerPos.lat, customerPos.lng],
+                    [lat, lng]
+                ]);
+                
+                // Calculate distance and ETA
+                const distance = calculateDistance(customerPos.lat, customerPos.lng, lat, lng);
+                const etaMinutes = Math.round(distance * 8); // Approx 8 min per km
+                
+                document.getElementById('provider-eta').textContent = `${etaMinutes} min away`;
+                document.getElementById('eta-text').textContent = `Estimated arrival: ${etaMinutes} min`;
+                document.getElementById('eta-time').innerHTML = `${etaMinutes}<span class="text-[14px] font-normal">min</span>`;
+            }
+            
+            // Re-fit bounds
+            const group = new L.featureGroup([customerMarker, providerMarker]);
+            map.fitBounds(group.getBounds().pad(0.2));
+        }
+        
+        async function loadProviderLocation() {
+            const supabase = getSupabase();
+            if (!supabase || !providerData?.id) return;
             
             try {
-                // Get customer ID
-                const { data: customer } = await supabase
-                    .from(DB_TABLES.CUSTOMERS)
-                    .select('id')
-                    .eq('id', userId)
+                const { data: location } = await supabase
+                    .from(DB_TABLES.LOCATIONS)
+                    .select('*')
+                    .eq('provider_id', providerData.id)
                     .single();
                 
-                // Create booking
-                const { data: booking, error } = await supabase
-                    .from(DB_TABLES.BOOKINGS)
+                if (location) {
+                    updateProviderLocation(location.lat, location.lng);
+                }
+            } catch (error) {
+                console.error('Error loading provider location:', error);
+            }
+        }
+        
+        // ============================================================
+        // STATUS TIMELINE
+        // ============================================================
+        
+        function updateStatusTimeline(status) {
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            
+            const statusOrder = ['pending', 'accepted', 'started', 'completed'];
+            const currentIndex = statusOrder.indexOf(status);
+            
+            timelineItems.forEach((item, index) => {
+                item.classList.remove('active', 'completed');
+                
+                if (index < currentIndex) {
+                    item.classList.add('completed');
+                } else if (index === currentIndex) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Update timestamps
+            if (bookingData) {
+                if (bookingData.accepted_at) {
+                    document.getElementById('time-accepted').textContent = formatDate(bookingData.accepted_at, 'relative');
+                    document.getElementById('time-accepted').classList.remove('hidden');
+                }
+                if (bookingData.started_at) {
+                    document.getElementById('time-started').textContent = formatDate(bookingData.started_at, 'relative');
+                    document.getElementById('time-started').classList.remove('hidden');
+                }
+                if (bookingData.completed_at) {
+                    document.getElementById('time-completed').textContent = formatDate(bookingData.completed_at, 'relative');
+                    document.getElementById('time-completed').classList.remove('hidden');
+                }
+            }
+        }
+        
+        // ============================================================
+        // CHAT
+        // ============================================================
+        
+        function setupChatSubscription() {
+            const supabase = getSupabase();
+            if (!supabase || !bookingId) return;
+            
+            supabase
+                .channel('chat-' + bookingId)
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: DB_TABLES.MESSAGES,
+                    filter: 'booking_id=eq.' + bookingId
+                }, (payload) => {
+                    console.log('New message:', payload);
+                    addMessageToChat(payload.new);
+                })
+                .subscribe();
+        }
+        
+        function openChat() {
+            document.getElementById('chat-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            
+            // Load existing messages
+            loadChatMessages();
+        }
+        
+        function closeChat() {
+            document.getElementById('chat-modal').classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        
+        async function loadChatMessages() {
+            const supabase = getSupabase();
+            if (!supabase || !bookingId) return;
+            
+            try {
+                const { data: messages } = await supabase
+                    .from(DB_TABLES.MESSAGES)
+                    .select('*')
+                    .eq('booking_id', bookingId)
+                    .order('created_at', { ascending: true });
+                
+                const container = document.getElementById('chat-container');
+                container.innerHTML = '';
+                
+                messages?.forEach(msg => addMessageToChat(msg));
+                
+                // Scroll to bottom
+                container.scrollTop = container.scrollHeight;
+                
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+        
+        function addMessageToChat(message) {
+            const container = document.getElementById('chat-container');
+            const isMe = message.sender_id === getUserId();
+            
+            const div = document.createElement('div');
+            div.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+            div.innerHTML = `
+                <div class="chat-bubble ${isMe ? 'sent' : 'received'} rounded-2xl px-4 py-2.5 max-w-[80%]">
+                    <p class="font-body-md text-sm">${message.content}</p>
+                    <p class="font-label-sm text-[10px] mt-1 ${isMe ? 'text-white/70' : 'text-secondary'}">${formatDate(message.created_at, 'time')}</p>
+                </div>
+            `;
+            
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            const supabase = getSupabase();
+            const userId = getUserId();
+            if (!supabase || !userId || !bookingId) return;
+            
+            try {
+                const { error } = await supabase
+                    .from(DB_TABLES.MESSAGES)
                     .insert({
-                        customer_id: userId,
-                        provider_id: bookingData.providerId,
-                        service_type: bookingData.serviceType,
-                        description: bookingData.description,
-                        address: bookingData.address,
-                        location: bookingData.lat && bookingData.lng ? `POINT(${bookingData.lng} ${bookingData.lat})` : null,
-                        status: 'pending',
-                        price: bookingData.price,
+                        booking_id: bookingId,
+                        sender_id: userId,
+                        content: content,
                         created_at: new Date().toISOString()
-                    })
-                    .select()
-                    .single();
+                    });
                 
                 if (error) throw error;
                 
-                // Hide loading, show success
-                document.getElementById('booking-overlay').classList.add('hidden');
-                document.getElementById('success-modal').classList.remove('hidden');
-                
-                // Store booking ID for tracking
-                localStorage.setItem('lastBookingId', booking.id);
+                input.value = '';
                 
             } catch (error) {
-                console.error('Booking error:', error);
-                document.getElementById('booking-overlay').classList.add('hidden');
-                showToast('Failed to create booking. Please try again.', 'error');
+                console.error('Error sending message:', error);
+                showToast('Failed to send message', 'error');
             }
         }
         
         // ============================================================
-        // NAVIGATION
+        // RATING
         // ============================================================
         
-        function goToTracking() {
-            const bookingId = localStorage.getItem('lastBookingId');
-            if (bookingId) {
-                window.location.href = `tracking.html?booking=${bookingId}`;
+        function setRating(rating) {
+            currentRating = rating;
+            
+            document.querySelectorAll('.star-btn').forEach((btn, index) => {
+                const star = btn.querySelector('.material-symbols-outlined');
+                if (index < rating) {
+                    star.style.fontVariationSettings = "'FILL' 1";
+                    btn.classList.remove('text-secondary');
+                    btn.classList.add('text-tertiary');
+                } else {
+                    star.style.fontVariationSettings = "'FILL' 0";
+                    btn.classList.remove('text-tertiary');
+                    btn.classList.add('text-secondary');
+                }
+            });
+        }
+        
+        async function submitRating() {
+            if (currentRating === 0) {
+                showToast('Please select a rating', 'error');
+                return;
+            }
+            
+            const supabase = getSupabase();
+            if (!supabase || !bookingId) return;
+            
+            try {
+                const { error } = await supabase
+                    .from(DB_TABLES.BOOKINGS)
+                    .update({
+                        customer_rating: currentRating,
+                        customer_review: document.getElementById('review-text').value,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', bookingId);
+                
+                if (error) throw error;
+                
+                document.getElementById('rate-modal').classList.add('hidden');
+                showToast('Thank you for your feedback!', 'success');
+                
+            } catch (error) {
+                console.error('Error submitting rating:', error);
+                showToast('Failed to submit rating', 'error');
+            }
+        }
+        
+        // ============================================================
+        // ACTIONS
+        // ============================================================
+        
+        function callProvider() {
+            if (providerData?.profiles?.phone) {
+                window.location.href = `tel:${providerData.profiles.phone}`;
             } else {
-                window.location.href = 'tracking.html';
+                showToast('Phone number not available', 'warning');
             }
         }
         
-        function goToDashboard() {
-            window.location.href = 'dashboard.html';
+        function shareLocation() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'My Location',
+                    text: `I'm waiting for a plumber at ${bookingData?.address || 'my location'}`,
+                    url: window.location.href
+                });
+            } else {
+                showToast('Sharing not supported on this device', 'warning');
+            }
+        }
+        
+        function cancelBooking() {
+            if (bookingData?.status === 'completed') {
+                showToast('Cannot cancel completed booking', 'error');
+                return;
+            }
+            document.getElementById('cancel-modal').classList.remove('hidden');
+        }
+        
+        function closeCancelModal() {
+            document.getElementById('cancel-modal').classList.add('hidden');
+        }
+        
+        async function confirmCancel() {
+            const supabase = getSupabase();
+            if (!supabase || !bookingId) return;
+            
+            try {
+                const { error } = await supabase
+                    .from(DB_TABLES.BOOKINGS)
+                    .update({
+                        status: 'cancelled',
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', bookingId);
+                
+                if (error) throw error;
+                
+                document.getElementById('cancel-modal').classList.add('hidden');
+                showToast('Booking cancelled', 'info');
+                
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error cancelling:', error);
+                showToast('Failed to cancel booking', 'error');
+            }
+        }
+        
+        function showMoreOptions() {
+            // Could show a bottom sheet with more options
+            showToast('More options coming soon', 'info');
+        }
+        
+        // ============================================================
+        // UTILITIES
+        // ============================================================
+        
+        function showLoading(message) {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.querySelector('p').textContent = message;
+            overlay.classList.remove('hidden');
+        }
+        
+        function hideLoading() {
+            document.getElementById('loading-overlay').classList.add('hidden');
         }
         
         // ============================================================
         // GLOBAL EXPORTS
         // ============================================================
         
-        window.selectService = selectService;
-        window.selectAddress = selectAddress;
-        window.selectProvider = selectProvider;
-        window.showAddressMap = showAddressMap;
-        window.confirmAddress = confirmAddress;
-        window.nextStep = nextStep;
-        window.prevStep = prevStep;
-        window.goToTracking = goToTracking;
-        window.goToDashboard = goToDashboard;
+        window.openChat = openChat;
+        window.closeChat = closeChat;
+        window.sendMessage = sendMessage;
+        window.callProvider = callProvider;
+        window.shareLocation = shareLocation;
+        window.cancelBooking = cancelBooking;
+        window.closeCancelModal = closeCancelModal;
+        window.confirmCancel = confirmCancel;
+        window.setRating = setRating;
+        window.submitRating = submitRating;
+        window.showMoreOptions = showMoreOptions;
     </script>
 </body>
 </html>
-<!-- '''
-
-# Write to file
-with open('/mnt/agents/output/customer_booking.html', 'w') as f:
-    f.write(booking_html)
-
-print("✅ customer/booking.html created successfully!")
-print(f"📄 File size: {len(booking_html)} characters")
-print("\n📋 Features included:")
-print("  • 4-Step Booking Flow (with progress bar)")
-print("  • Step 1: Service Type Selection (6 options)")
-print("  • Step 2: Location + Description + Photo Upload")
-print("  • Step 3: Provider Selection (from Supabase)")
-print("  • Step 4: Review & Confirm with Price Breakdown")
-print("  • Saved Addresses")
-print("  • Map Integration (for new address)")
-print("  • Photo Upload Preview")
-print("  • Real-time Price Calculation")
-print("  • Success Modal with Tracking Link")
-print("  • Form Validation per Step")
-print("  • Responsive Design") -->
